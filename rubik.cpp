@@ -27,6 +27,8 @@ struct Rubik{
     // 6 faces  [0,1,2,3,4,5] -> [G,O,B,R,Y,W]
     
     int state[6][16]={0};
+    // char hash_map[7] = "GOBRYW";
+    char hash_map[7] = "OGRBWY";
 
     Rubik(){//target state
         for(int i=0;i<6;i++)
@@ -34,17 +36,18 @@ struct Rubik{
                 state[i][j]=i;
     }
     char hash(int v){
-        if(!v)
-            return 'G';
-        if(v==1)
-            return 'O';
-        if(v==2)
-            return 'B';
-        if(v==3)
-            return 'R';
-        if(v==4)
-            return 'Y';
-        return 'W';
+        // if(!v)
+        //     return 'G';
+        // if(v==1)
+        //     return 'O';
+        // if(v==2)
+        //     return 'B';
+        // if(v==3)
+        //     return 'R';
+        // if(v==4)
+        //     return 'Y';
+        // return 'W';
+        return hash_map[v];
     }
     vector<int> tmp;
     void print(){
@@ -200,51 +203,51 @@ struct Rubik{
         switch (str[0]){
             case 'L':
                 L();
-                if(str[1]) L();
+                if(str[1] =='2') L();
                 break;
             case 'R':
                 R();
-                if(str[1]) R();
+                if(str[1] =='2') R();
                 break;
             case 'F':
                 F();
-                if(str[1]) F();
+                if(str[1] =='2') F();
                 break;
             case 'B':
                 B();
-                if(str[1]) B();
+                if(str[1] =='2') B();
                 break;
             case 'U':
                 U();
-                if(str[1]) U();
+                if(str[1] =='2') U();
                 break;
             case 'D':
                 D();
-                if(str[1]) D();
+                if(str[1] =='2') D();
                 break;
             case 'l':
                 l();
-                if(str[1]) l();
+                if(str[1] =='2') l();
                 break;
             case 'r':
                 r();
-                if(str[1]) r();
+                if(str[1] =='2') r();
                 break;
             case 'f':
                 f();
-                if(str[1]) f();
+                if(str[1] =='2') f();
                 break;
             case 'b':
                 b();
-                if(str[1]) b();
+                if(str[1] =='2') b();
                 break;
             case 'u':
                 u();
-                if(str[1]) u();
+                if(str[1] =='2') u();
                 break;
             case 'd':
                 d();
-                if(str[1]) d();
+                if(str[1] =='2') d();
                 break;
             default://parsing error
                 assert(0);
@@ -264,7 +267,21 @@ void interative_mode(Rubik &obj){
     }
     puts("---------end---------");
 }
+
+void operation_mode(Rubik &obj){
+    puts("Input string of operations seperated by space.");
+    char str[100];
+    scanf("%s",str);
+    for(int i=0; str[i];i++){
+        obj.operation(&str[i]);
+    }
+    obj.print();
+}
 int main(){
 	Rubik test;
-    interative_mode(test);
+    puts("Input 'i' to open interactive mode, 'o' to open operation mode");
+    char op;
+    scanf("%c",&op);
+    if(op=='i') interative_mode(test);
+    else operation_mode(test);
 }
