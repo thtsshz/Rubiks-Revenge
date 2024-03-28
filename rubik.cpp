@@ -3,6 +3,7 @@
 #include<algorithm>
 #include<assert.h>
 using namespace std;
+// comment
 struct Rubik{
     /* target state:
         O is the abbreviation for orange, which is our front face.
