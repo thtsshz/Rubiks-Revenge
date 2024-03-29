@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<vector>
 #include<algorithm>
+#include<string.h>
 #include<assert.h>
 using namespace std;
 struct Rubik{
@@ -67,7 +68,7 @@ struct Rubik{
     // adopt World Cube Association(WCA) Single-Turn notation:
     void F(){
         int path[4]={2,5,0,4}; //r y o w
-        int index[4][4]={{0,4,8,12},{0,1,2,3},{3,7,11,15},{12,13,14,15}};
+        int index[4][4]={{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}};
 
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
@@ -78,7 +79,7 @@ struct Rubik{
     }
     void f(){
         int path[4]={2,5,0,4}; //r y o w
-        int index[4][4]={{1,5,9,13},{4,5,6,7},{2,6,10,14},{8,9,10,11}};
+        int index[4][4]={{1,5,9,13},{7,6,5,4},{14,10,6,2},{8,9,10,11}};
 
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
@@ -123,7 +124,7 @@ struct Rubik{
     
     void B(){
         int path[4]={0,5,2,4}; //o y r w 
-        int index[4][4]={{0,4,8,12},{12,13,14,15},{3,7,11,15},{0,1,2,3}};
+        int index[4][4]={{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}};
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
                 swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
@@ -133,7 +134,7 @@ struct Rubik{
     }
     void b(){
         int path[4]={0,5,2,4}; //o y r w 
-        int index[4][4]={{1,5,9,13},{8,9,10,11},{2,6,10,14},{4,5,6,7}};
+        int index[4][4]={{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}};
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
                 swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
@@ -247,9 +248,14 @@ void interative_mode(Rubik &obj){
 void operation_mode(Rubik &obj){
     puts("Input string of operations seperated by space.");
     char str[100];
-    scanf("%s",str);
+    scanf(" %s",str);
     for(int i=0; str[i];i++){
-        obj.operation(&str[i]);
+    	char tmp[2]={str[i],'\0'};
+    	obj.operation(tmp);
+//    	printf("\n%s %d\n",tmp,strlen(tmp));
+
+//        obj.operation(&str[i]);
+//        printf("\n%s %d\n",str[i],strlen(&str[i]));
     }
     obj.print();
 }
