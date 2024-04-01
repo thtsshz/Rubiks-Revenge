@@ -1,52 +1,41 @@
 #include<stdio.h>
 #include<vector>
 #include<algorithm>
+#include<string.h>
 #include<assert.h>
 using namespace std;
-// comment
 struct Rubik{
     /* target state:
-        O is the abbreviation for orange, which is our front face.
+        g is the abbreviation for GREEN, which is our front face.
 
-          YYYY
-          YYYY
-          YYYY
-          YYYY
-
-    GGGG  OOOO  BBBB  RRRR
-    GGGG  OOOO  BBBB  RRRR
-    GGGG  OOOO  BBBB  RRRR
-    GGGG  OOOO  BBBB  RRRR
-
+    	  WWWW
           WWWW
           WWWW
           WWWW
-          WWWW
+    
+	OOOO  GGGG  RRRR  BBBB
+	OOOO  GGGG  RRRR  BBBB
+    OOOO  GGGG  RRRR  BBBB
+    OOOO  GGGG  RRRR  BBBB
+    	  
+		  YYYY
+          YYYY
+          YYYY
+          YYYY
     
     */
-    // 6 faces  [0,1,2,3,4,5] -> [G,O,B,R,Y,W]
+    // 6 faces  [0,1,2,3,4,5] -> [O,G,R,B,W,Y]
     
     int state[6][16]={0};
-    char hash_map[7] = "GOBRYW";
-    // char hash_map[7] = "OGRBWY";
+    int rotation[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};// clockwise rotation
+    char hash_map[7] = "OGRBWY";
 
     Rubik(){//target state
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
     }
-    char hash(int v){
-        // if(!v)
-        //     return 'G';
-        // if(v==1)
-        //     return 'O';
-        // if(v==2)
-        //     return 'B';
-        // if(v==3)
-        //     return 'R';
-        // if(v==4)
-        //     return 'Y';
-        // return 'W';
+    inline char hash(int v){
         return hash_map[v];
     }
     vector<int> tmp;
@@ -78,20 +67,19 @@ struct Rubik{
     }
     // adopt World Cube Association(WCA) Single-Turn notation:
     void F(){
-        int path[4]={2,5,0,4}; //bwgy
-        int index[4][4]={{0,4,8,12},{0,1,2,3},{3,7,11,15},{12,13,14,15}};
+        int path[4]={2,5,0,4}; //r y o w
+        int index[4][4]={{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}};
 
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
                 swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
         tmp.assign(state[1],state[1]+16);
-        for(int i=0;i<15;i++)
-            state[1][i]=tmp[after[i]];
+        for(int i=0;i<16;i++)
+            state[1][i]=tmp[rotation[i]];
     }
     void f(){
-        int path[4]={2,5,0,4}; //bwgy
-        int index[4][4]={{1,5,9,13},{4,5,6,7},{2,6,10,14},{8,9,10,11}};
+        int path[4]={2,5,0,4}; //r y o w
+        int index[4][4]={{1,5,9,13},{7,6,5,4},{14,10,6,2},{8,9,10,11}};
 
         for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
@@ -99,105 +87,94 @@ struct Rubik{
     }
 
     void R(){
-        int path[4]={1,4,3,5}; //o y r w
-        for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
-                int offset = path[i]==3?0:3;
-                int offset2 = path[i-1]==3?0:3;
-                swap(state[path[i]][offset+j*4],state[path[i-1]][offset2+j*4]);
-            }
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
-        tmp.assign(state[2],state[2]+16);
-        for(int i=0;i<15;i++)
-            state[2][i]=tmp[after[i]];
+        int path[4]={3,5,1,4}; //b y g w
+        int index[4][4]={{12,8,4,0},{3,7,11,15},{3,7,11,15},{3,7,11,15}};
+		for(int i=3;i>=1;i--)
+            for(int j=0;j<4;j++)
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
+		tmp.assign(state[2],state[2]+16);
+        for(int i=0;i<16;i++)
+            state[2][i]=tmp[rotation[i]];
     }
     void r(){
-        int path[4]={1,4,3,5}; //o y r w
-        for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
-            	int offset = path[i]==3?1:2;
-                int offset2 = path[i-1]==3?1:2;
-                swap(state[path[i]][offset+j*4],state[path[i-1]][offset2+j*4]);
-            }
+		int path[4]={3,5,1,4}; //b y g w
+        int index[4][4]={{13,9,5,1},{2,6,10,14},{2,6,10,14},{2,6,10,14}};        
+		for(int i=3;i>=1;i--)
+            for(int j=0;j<4;j++)
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
     }
 
     void L(){
-        int path[4]={1,5,3,4}; //o w r y 
+        int path[4]={1,5,3,4}; //g y b w
+        int index[4][4]={{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}};
         for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
-                int offset = path[i]==3?3:0;
-                int offset2 = path[i-1]==3?3:0;
-                swap(state[path[i]][offset+j*4],state[path[i-1]][offset2+j*4]);
-            }
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
+            for(int j=0;j<4;j++)
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
         tmp.assign(state[0],state[0]+16);
-        for(int i=0;i<15;i++)
-            state[0][i]=tmp[after[i]];
+        for(int i=0;i<16;i++)
+            state[0][i]=tmp[rotation[i]];
     }
     void l(){
-        int path[4]={1,5,3,4}; //o w r y 
+    	int path[4]={1,5,3,4}; //g y b w
+        int index[4][4]={{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}};
         for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
-                int offset = path[i]==3?2:1;
-                int offset2 = path[i-1]==3?2:1;
-                swap(state[path[i]][offset+j*4],state[path[i-1]][offset2+j*4]);
-            }
+            for(int j=0;j<4;j++)
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
     }
     
     void B(){
-        int path[4]={0,5,2,4}; //g w b y 
-        int index[4][4]={{0,4,8,12},{12,13,14,15},{3,7,11,15},{0,1,2,3}};
+        int path[4]={0,5,2,4}; //o y r w 
+        int index[4][4]={{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}};
         for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
+            for(int j=0;j<4;j++)
                 swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
-            }
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
         tmp.assign(state[3],state[3]+16);
-        for(int i=0;i<15;i++)
-            state[3][i]=tmp[after[i]];
+        for(int i=0;i<16;i++)
+            state[3][i]=tmp[rotation[i]];
     }
     void b(){
-        int path[4]={0,5,2,4}; //g w b y 
-        int index[4][4]={{1,5,9,13},{8,9,10,11},{2,6,10,14},{4,5,6,7}};
+        int path[4]={0,5,2,4}; //o y r w 
+        int index[4][4]={{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}};
         for(int i=3;i>=1;i--)
-            for(int j=0;j<4;j++){
+            for(int j=0;j<4;j++)
                 swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
-            }
     }
 
     void U(){
-        for(int i=0;i<3;i++){
+        int path[4]={0,3,2,1}; //o b r g 
+        int index[4][4]={{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}};
+        for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
-                swap(state[i][j],state[i+1][j]);
-        }
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
         tmp.assign(state[4],state[4]+16);
-        for(int i=0;i<15;i++)
-            state[4][i]=tmp[after[i]];
+        for(int i=0;i<16;i++)
+            state[4][i]=tmp[rotation[i]];
     }
     void u(){
-        for(int i=0;i<3;i++){
+        int path[4]={0,3,2,1}; //o b r g 
+        int index[4][4]={{4,5,6,7},{4,5,6,7},{4,5,6,7},{4,5,6,7}};
+        for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
-                swap(state[i][4+j],state[i+1][4+j]);
-        }    
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);   
     }
 
     void D(){
-        for(int i=3;i>=1;i--){
+    	int path[4]={1,2,3,0}; //g r b o 
+        int index[4][4]={{12,13,14,15},{12,13,14,15},{12,13,14,15},{12,13,14,15}};
+        for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
-                swap(state[i][12+j],state[i-1][12+j]);
-        }
-        int after[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};
-        tmp.assign(state[4],state[4]+16);
-        for(int i=0;i<15;i++)
-            state[4][i]=tmp[after[i]];    
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
+        tmp.assign(state[5],state[5]+16);
+        for(int i=0;i<16;i++)
+            state[5][i]=tmp[rotation[i]];    
     }
 
     void d(){
-        for(int i=3;i>=1;i--){
+    	int path[4]={1,2,3,0}; //g r b o 
+        int index[4][4]={{8,9,10,11},{8,9,10,11},{8,9,10,11},{8,9,10,11}};
+        for(int i=3;i>=1;i--)
             for(int j=0;j<4;j++)
-                swap(state[i][8+j],state[i-1][8+j]);
-        }
+                swap(state[path[i]][index[i][j]],state[path[i-1]][index[i-1][j]]);
     }
     void operation(char *str){
         switch (str[0]){
@@ -271,14 +248,20 @@ void interative_mode(Rubik &obj){
 void operation_mode(Rubik &obj){
     puts("Input string of operations seperated by space.");
     char str[100];
-    scanf("%s",str);
+    scanf(" %s",str);
     for(int i=0; str[i];i++){
-        obj.operation(&str[i]);
+    	char tmp[2]={str[i],'\0'};
+    	obj.operation(tmp);
+//    	printf("\n%s %d\n",tmp,strlen(tmp));
+
+//        obj.operation(&str[i]);
+//        printf("\n%s %d\n",str[i],strlen(&str[i]));
     }
     obj.print();
 }
 int main(){
 	Rubik test;
+//	interative_mode(test);
     puts("Input 'i' to open interactive mode, 'o' to open operation mode");
     char op;
     scanf("%c",&op);
