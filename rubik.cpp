@@ -27,8 +27,8 @@ struct Rubik{
     // 6 faces  [0,1,2,3,4,5] -> [G,O,B,R,Y,W]
     
     int state[6][16]={0};
-    // char hash_map[7] = "GOBRYW";
-    char hash_map[7] = "OGRBWY";
+    char hash_map[7] = "GOBRYW";
+    // char hash_map[7] = "OGRBWY";
 
     Rubik(){//target state
         for(int i=0;i<6;i++)
