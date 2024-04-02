@@ -234,7 +234,7 @@ struct Rubik{
 };
 void interative_mode(Rubik &obj){
     puts("---interative_mode---");
-    char str[10];
+    char str[1005];
     while(~scanf(" %s",str)){
         puts("before:");
         obj.print();
@@ -247,17 +247,19 @@ void interative_mode(Rubik &obj){
 
 void operation_mode(Rubik &obj){
     puts("Input string of operations seperated by space.");
-    char str[100];
-    scanf(" %s",str);
-    for(int i=0; str[i];i++){
-    	char tmp[2]={str[i],'\0'};
-    	obj.operation(tmp);
-//    	printf("\n%s %d\n",tmp,strlen(tmp));
-
-//        obj.operation(&str[i]);
-//        printf("\n%s %d\n",str[i],strlen(&str[i]));
-    }
-    obj.print();
+    char str[1005];
+    while(~scanf(" %s",str)){
+	   	for(int i=0; str[i];i++){
+	    	char tmp[2]={str[i],'\0'};
+	    	obj.operation(tmp);
+	//    	printf("\n%s %d\n",tmp,strlen(tmp));
+	
+	//        obj.operation(&str[i]);
+	//        printf("\n%s %d\n",str[i],strlen(&str[i]));
+	    }
+	    obj.print();
+	}
+    
 }
 int main(){
 	Rubik test;
