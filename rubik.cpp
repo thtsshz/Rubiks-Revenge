@@ -34,7 +34,7 @@ struct Rubik{
     // 6 faces  [0,1,2,3,4,5] -> [O,G,R,B,W,Y]
     
     int state[6][16]={0};
-    int phase = 0;
+    int phase = 1;
     Rubik(){//target state
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
@@ -234,6 +234,15 @@ struct Rubik{
             default://parsing error
                 assert(0);
             break;
+        }
+    }
+    bool phase_check(){
+        if(phase==1){
+            bool right=1;
+            for(int i=0;i<3;i+=2){// check orange face and red face
+                right&=(state[i][5]==i)&(state[i][6]==i)&(state[i][9]==i)&(state[i][10]==i);
+            }
+            return right;
         }
     }
 };
