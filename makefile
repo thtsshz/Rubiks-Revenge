@@ -1,24 +1,32 @@
-# Makefile for compiling rubik.cpp
-
 # Compiler
-CC = g++
+CXX = g++
 
 # Compiler flags
-CFLAGS = -std=c++11 -Wall
-
-# Source file
-SRC = rubik.cpp
+CXXFLAGS = -std=c++11 -Wall -Wextra
 
 # Executable name
-EXEC = rubik
+EXEC = ga
+
+# Source files
+SRCS = ga.cpp
+
+# Object files
+OBJS = $(SRCS:.cpp=.o)
+
+# Header files
+HEADERS = rubik.h
 
 # Default target
 all: $(EXEC)
 
-# Target for compiling the executable
-$(EXEC): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $^
+# Rule to link object files and create the executable
+$(EXEC): $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
-# Target for cleaning generated files
+# Rule to compile source files into object files
+%.o: %.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean rule
 clean:
-	rm -f $(EXEC)
+	rm -f $(OBJS) $(EXEC)
