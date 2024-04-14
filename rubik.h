@@ -266,29 +266,26 @@ struct Rubik{
             break;
         }
     }
-    bool phase_check(){
+    void phase_check(){
         if(phase==1){
             bool right=1;
-            for(int i=0;i<3;i+=2){// check orange face and red face
-                right&=(state[i][5]==i)&(state[i][6]==i)&(state[i][9]==i)&(state[i][10]==i);
+            for(auto x : {5, 6, 9, 10}) {
+                right &= (state[0][x] == 0 || state[0][x] == 2);
+                right &= (state[2][x] == 0 || state[2][x] == 2);
             }
             phase+=right;
-            return right;
         }
     }
     int fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
         value=0;
         if(phase==1){
-            for(int i=0;i<6;i++){
-                value+=(state[i][5]==state[i][6]&&(state[i][5]==0||state[i][5]==2)) + (state[i][5]==state[i][9]&&(state[i][5]==0||state[i][5]==2)) + (state[i][9]==state[i][10]&&(state[i][9]==0||state[i][9]==2)) + (state[i][6]==state[i][10]&&(state[i][6]==0||state[i][6]==2));
+            for(auto x : {5, 6, 9, 10}) {
+                value += (state[0][x] == 0 || state[0][x] == 2);
+                value += (state[2][x] == 0 || state[2][x] == 2);
             }
-            for(int i=0;i<3;i+=2){// check orange face and red face
-                int arr[4] = {5, 6, 9, 10};
-                bool right=1;
-                for(auto x:arr)
-                    right&=(state[i][x]==i);
-                value+=right*10;
-            }
+        }
+        else if(phase==2){
+            
         }
     }
 };

@@ -18,12 +18,17 @@ vector<string> G3 = {"R2", "L2", "F2", "B2", "U", "D", "r2", "l2", "f2", "b2"};
 const int TEST_NUM=1;
 const int population_size=2000;
 const int generation = 1000;
+
 vector<Rubik> pop;
 Rubik scramble(Rubik r,int len){
     while(len--){
         if(r.phase==1){
             uniform_int_distribution<int> dis(0, (int)G0.size() - 1);
             r.operation(G0[dis(gen)].c_str());
+        }
+        else if(r.phase==2){
+            uniform_int_distribution<int> dis(0, (int)G1.size() - 1);
+            r.operation(G1[dis(gen)].c_str());
         }
     }
     r.fitness();
@@ -51,27 +56,44 @@ void mutation(Rubik &r){
     int len=dis(gen);//generate the length of operation
     r=scramble(r,len);
 }
+void expansion(){//expand the size of pop to population_size
+    int sz=(int)pop.size;
+    while((int)pop.size < population_size){
+        uniform_int_distribution<int> dis(0, sz - 1);
+        auto r = pop[dis(gen)];
+        pop.emplace_back(scramble(r,10));
+    }
+}
 int main(){
     for(int i=0;i<TEST_NUM;i++){
         Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFfFfBUURrRrUuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
         // r.print();
         initialize(r);
-        for(int j=0;j<generation;j++){
-            vector<Rubik> offspring;
-            for(int k=0;k<population_size;k++){
-                Rubik x=tournament_selection(5);
-                mutation(x);
-                offspring.emplace_back(x);
-            }        
-            pop.insert(pop.end(), offspring.begin(), offspring.end());
-		    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
-		    pop.resize(population_size);
-            if(j%100==0){
-                printf("fitness : %d\n",pop[0].value);
-                pop[0].print();
+        for(int phase = 1; phase < 9 ; phase++){
+            for(int j=0;j<generation;j++){
+                vector<Rubik> offspring;
+                for(int k=0;k<population_size;k++){
+                    Rubik x=tournament_selection(5);
+                    mutation(x);
+                    offspring.emplace_back(x);
+                }        
+                pop.insert(pop.end(), offspring.begin(), offspring.end());
+                sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
+                pop.resize(population_size);
+                // if(j%100==0){
+                //     printf("fitness : %d\n",pop[0].value);
+                //     pop[0].print();
+                // }
             }
+            
+            for(auto &x:pop)
+                x.phase_check();//check and modify the phase
+            
+            auto condition = [&](const auto& x) { return x.phase == phase;};
+            pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end());
+            if(phase==2)
+                break;
+            expansion();
         }
-        printf("fitness : %d\n",pop[0].value);
-        pop[0].print();
     }
 }
