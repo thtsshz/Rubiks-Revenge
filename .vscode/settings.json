@@ -45,7 +45,11 @@
     "xstddef": "cpp",
     "xtr1common": "cpp",
     "xutility": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "chrono": "cpp",
+    "fstream": "cpp",
+    "ratio": "cpp",
+    "xmemory0": "cpp"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

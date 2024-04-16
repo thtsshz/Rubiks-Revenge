@@ -43,14 +43,18 @@ struct Rubik{
     // void operation_mode();
 
     int state[6][16]={0};
-    int phase = 1;
-    int value = 0;
+    int phase;
+    int value;
     Rubik(){//target state
+        phase=1;
+        value=0;
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
     }
     Rubik(char *op){
+        phase=1;
+        value=0;
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -74,19 +78,47 @@ struct Rubik{
     inline char hash(int v){
         return hash_map[v];
     }
+    void colorful_text(char ch) {
+        switch (ch) {
+            case 'O':
+                printf("\033[38;2;255;165;0m%c\033[0m", ch); // Orange
+                break;
+            case 'G':
+                printf("\033[32m%c\033[0m", ch); // Green
+                break;
+            case 'R':
+                printf("\033[31m%c\033[0m", ch); // Red
+                break;
+            case 'B':
+                printf("\033[34m%c\033[0m", ch); // Blue
+                break;
+            case 'W':
+                printf("\033[37m%c\033[0m", ch); // White
+                break;
+            case 'Y':
+                printf("\033[33m%c\033[0m", ch); // Yellow
+                break;
+            default:
+                printf("%c", ch); // Print as is for other characters
+                break;
+        }
+    }
+
     void print(){
         puts("************");
         for(int i=0;i<4;i++){
             printf("      ");
             for(int j=0;j<4;j++)
-                printf("%c",hash(state[4][i*4+j]));
+                colorful_text(hash(state[4][i*4+j]));
+                // printf("%c",hash(state[4][i*4+j]));
             putchar('\n');
         }
         puts("");
         for(int i=0;i<4;i++){
             for(int j=0;j<4;j++){
                 for(int k=0;k<4;k++){
-                    printf("%c",hash(state[j][i*4+k]));
+                    colorful_text(hash(state[j][i*4+k]));
+                    // printf("%c",hash(state[j][i*4+k]));
                 }
                 printf("  ");
             }
@@ -96,7 +128,8 @@ struct Rubik{
         for(int i=0;i<4;i++){
             printf("      ");
             for(int j=0;j<4;j++)
-                printf("%c",hash(state[5][i*4+j]));
+                colorful_text(hash(state[5][i*4+j]));
+                // printf("%c",hash(state[5][i*4+j]));
             putchar('\n');
         }
     }
@@ -275,17 +308,43 @@ struct Rubik{
             }
             phase+=right;
         }
+        else if(phase==2){
+            bool right=1;
+
+            for(auto x : {5, 6, 9, 10}) {
+                value &= (state[0][x] == 0 || state[0][x] == 2);
+                value &= (state[2][x] == 0 || state[2][x] == 2);
+
+                value &= (state[1][x] == 1 || state[1][x] == 3);
+                value &= (state[3][x] == 1 || state[3][x] == 3);
+                
+                value &= (state[4][x] == 4 || state[4][x] == 5);
+                value &= (state[5][x] == 4 || state[5][x] == 5);
+            }
+            phase+=right;
+
+        }
     }
-    int fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
+    void fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
         value=0;
         if(phase==1){
             for(auto x : {5, 6, 9, 10}) {
                 value += (state[0][x] == 0 || state[0][x] == 2);
                 value += (state[2][x] == 0 || state[2][x] == 2);
             }
+
         }
         else if(phase==2){
-            
+            for(auto x : {5, 6, 9, 10}) {
+                value += (state[0][x] == 0 || state[0][x] == 2);
+                value += (state[2][x] == 0 || state[2][x] == 2);
+
+                value += (state[1][x] == 1 || state[1][x] == 3);
+                value += (state[3][x] == 1 || state[3][x] == 3);
+                
+                value += (state[4][x] == 4 || state[4][x] == 5);
+                value += (state[5][x] == 4 || state[5][x] == 5);
+            }
         }
     }
 };

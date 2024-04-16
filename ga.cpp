@@ -30,13 +30,15 @@ Rubik scramble(Rubik r,int len){
             uniform_int_distribution<int> dis(0, (int)G1.size() - 1);
             r.operation(G1[dis(gen)].c_str());
         }
-    }
+    }   
+
     r.fitness();
+
     return r;
 }
 void initialize(Rubik &r){
     for(int i=0;i<population_size;i++){
-        pop.emplace_back(scramble(r,10));
+        pop.push_back(scramble(r,10));
     }
     // for(int i=0;i<5;i++)
     //     pop[i].print();
@@ -57,8 +59,8 @@ void mutation(Rubik &r){
     r=scramble(r,len);
 }
 void expansion(){//expand the size of pop to population_size
-    int sz=(int)pop.size;
-    while((int)pop.size < population_size){
+    int sz=(int)pop.size();
+    while((int)pop.size() < population_size){
         uniform_int_distribution<int> dis(0, sz - 1);
         auto r = pop[dis(gen)];
         pop.emplace_back(scramble(r,10));
@@ -68,8 +70,12 @@ int main(){
     for(int i=0;i<TEST_NUM;i++){
         Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFfFfBUURrRrUuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
         // r.print();
+
         initialize(r);
+        
         for(int phase = 1; phase < 9 ; phase++){
+            printf("start phase : %d\n",phase);
+
             for(int j=0;j<generation;j++){
                 vector<Rubik> offspring;
                 for(int k=0;k<population_size;k++){
@@ -80,17 +86,19 @@ int main(){
                 pop.insert(pop.end(), offspring.begin(), offspring.end());
                 sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
                 pop.resize(population_size);
-                // if(j%100==0){
-                //     printf("fitness : %d\n",pop[0].value);
-                //     pop[0].print();
-                // }
+                if(j%100==0&&phase>1){
+                    printf("fitness : %d\n",pop[0].value);
+                    pop[0].print();
+                }
             }
             
             for(auto &x:pop)
                 x.phase_check();//check and modify the phase
-            
             auto condition = [&](const auto& x) { return x.phase == phase;};
-            pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end());
+            pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end());            
+            
+            printf("end phase : %d\n",phase);
+
             if(phase==2)
                 break;
             expansion();
