@@ -49,7 +49,10 @@
     "chrono": "cpp",
     "fstream": "cpp",
     "ratio": "cpp",
-    "xmemory0": "cpp"
+    "xmemory0": "cpp",
+    "optional": "cpp",
+    "array": "cpp",
+    "functional": "cpp"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

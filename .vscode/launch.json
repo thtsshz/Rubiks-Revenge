@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/easyl/桌面/paper/final project/Rubiks-Revenge",
-      "program": "c:/Users/easyl/桌面/paper/final project/Rubiks-Revenge/build/Debug/outDebug",
+      "cwd": "c:/Users/easyl/桌面/paper/final_project/Rubiks-Revenge",
+      "program": "c:/Users/easyl/桌面/paper/final_project/Rubiks-Revenge/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

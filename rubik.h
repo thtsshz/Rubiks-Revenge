@@ -311,30 +311,59 @@ struct Rubik{
         else if(phase==2){
             bool right=1;
 
-            for(auto x : {5, 6, 9, 10}) {
-                value &= (state[0][x] == 0 || state[0][x] == 2);
-                value &= (state[2][x] == 0 || state[2][x] == 2);
+            for(auto x : {5, 6, 9, 10}) { // index of center faces
+                right &= (state[0][x] == 0 || state[0][x] == 2);
+                right &= (state[2][x] == 0 || state[2][x] == 2);
 
-                value &= (state[1][x] == 1 || state[1][x] == 3);
-                value &= (state[3][x] == 1 || state[3][x] == 3);
+                right &= (state[1][x] == 1 || state[1][x] == 3);
+                right &= (state[3][x] == 1 || state[3][x] == 3);
                 
-                value &= (state[4][x] == 4 || state[4][x] == 5);
-                value &= (state[5][x] == 4 || state[5][x] == 5);
+                right &= (state[4][x] == 4 || state[4][x] == 5);
+                right &= (state[5][x] == 4 || state[5][x] == 5);
             }
             phase+=right;
 
         }
+        else if(phase==3){
+            bool right=1;
+            for(auto x : {0, 1}){
+                right &= (state[x][5]==state[x][9])&&(state[x][5]==x||state[x][5]==2+x);
+                right &= (state[x][6]==state[x][10])&&(state[x][6]==x||state[x][10]==2+x);
+            }
+            for(auto x : {2, 3}){
+                right &= (state[x][5]==state[x][9])&&(state[x][5]==x||state[x][5]==x-2);
+                right &= (state[x][6]==state[x][10])&&(state[x][6]==x||state[x][10]==x-2);
+            }
+            // up face
+            bool up_1=((state[4][5]==state[4][6])&&(state[4][5]==4||state[4][5]==5)) && ((state[4][9]==state[4][10])&&(state[4][9]==4||state[4][9]==5));
+            bool up_2=((state[4][5]==state[4][9])&&(state[4][5]==4||state[4][5]==5)) && ((state[4][6]==state[4][10])&&(state[4][6]==4||state[4][6]==5));
+            
+            right &= up_1||up_2;
+            
+            //down face 
+            bool down_1=((state[5][5]==state[5][6])&&(state[5][5]==4||state[5][5]==5)) && ((state[5][9]==state[5][10])&&(state[5][9]==4||state[5][9]==5));
+            bool down_2=((state[5][5]==state[5][9])&&(state[5][5]==4||state[5][5]==5)) && ((state[5][6]==state[5][10])&&(state[5][6]==4||state[5][6]==5));
+            
+            right &= down_1||down_2;
+            
+            //middle edge
+            right &= (state[0][4]==state[0][8]) && (state[3][7]==state[3][11]);
+
+            for(auto x : {0, 1, 2})
+                right &= (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
+            phase+=right;
+        }
     }
     void fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
         value=0;
-        if(phase==1){
-            for(auto x : {5, 6, 9, 10}) {
+        if(phase==1){// max : 8
+            for(auto x : {5, 6, 9, 10}) { // index of center faces
                 value += (state[0][x] == 0 || state[0][x] == 2);
                 value += (state[2][x] == 0 || state[2][x] == 2);
             }
 
         }
-        else if(phase==2){
+        else if(phase==2){// max : 24
             for(auto x : {5, 6, 9, 10}) {
                 value += (state[0][x] == 0 || state[0][x] == 2);
                 value += (state[2][x] == 0 || state[2][x] == 2);
@@ -345,6 +374,33 @@ struct Rubik{
                 value += (state[4][x] == 4 || state[4][x] == 5);
                 value += (state[5][x] == 4 || state[5][x] == 5);
             }
+        }
+        else if(phase==3){// max : 12 + 4 = 16 
+            for(auto x : {0, 1}){
+                value += (state[x][5]==state[x][9])&&(state[x][5]==x||state[x][5]==2+x);
+                value += (state[x][6]==state[x][10])&&(state[x][6]==x||state[x][10]==2+x);
+            }
+            for(auto x : {2, 3}){
+                value += (state[x][5]==state[x][9])&&(state[x][5]==x||state[x][5]==x-2);
+                value += (state[x][6]==state[x][10])&&(state[x][6]==x||state[x][10]==x-2);
+            }
+            // up face
+            bool up_1=((state[4][5]==state[4][6])&&(state[4][5]==4||state[4][5]==5)) && ((state[4][9]==state[4][10])&&(state[4][9]==4||state[4][9]==5));
+            bool up_2=((state[4][5]==state[4][9])&&(state[4][5]==4||state[4][5]==5)) && ((state[4][6]==state[4][10])&&(state[4][6]==4||state[4][6]==5));
+            
+            value += (up_1||up_2)*2;
+            
+            //down face 
+            bool down_1=((state[5][5]==state[5][6])&&(state[5][5]==4||state[5][5]==5)) && ((state[5][9]==state[5][10])&&(state[5][9]==4||state[5][9]==5));
+            bool down_2=((state[5][5]==state[5][9])&&(state[5][5]==4||state[5][5]==5)) && ((state[5][6]==state[5][10])&&(state[5][6]==4||state[5][6]==5));
+            
+            value += (down_1||down_2)*2;
+            
+            //middle edge
+            value += (state[0][4]==state[0][8]) && (state[3][7]==state[3][11]);
+
+            for(auto x : {0, 1, 2})
+                value += (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
         }
     }
 };

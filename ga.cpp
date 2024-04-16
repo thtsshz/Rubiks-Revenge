@@ -8,6 +8,7 @@
 #include<chrono>
 #include <fstream>
 #include<algorithm>
+#include <cassert>
 using namespace std;
 mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
 vector<string> G0 = {"R", "L", "F", "B", "U", "D", "r", "l", "f", "b", "u", "d"};
@@ -29,6 +30,14 @@ Rubik scramble(Rubik r,int len){
         else if(r.phase==2){
             uniform_int_distribution<int> dis(0, (int)G1.size() - 1);
             r.operation(G1[dis(gen)].c_str());
+        }
+        else if(r.phase==3){
+            uniform_int_distribution<int> dis(0, (int)G2.size() - 1);
+            r.operation(G2[dis(gen)].c_str());
+        }
+        else if(r.phase==4){
+            uniform_int_distribution<int> dis(0, (int)G3.size() - 1);
+            r.operation(G3[dis(gen)].c_str());
         }
     }   
 
@@ -80,13 +89,14 @@ int main(){
                 vector<Rubik> offspring;
                 for(int k=0;k<population_size;k++){
                     Rubik x=tournament_selection(5);
+                    assert(x.phase==phase);
                     mutation(x);
                     offspring.emplace_back(x);
                 }        
                 pop.insert(pop.end(), offspring.begin(), offspring.end());
                 sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
                 pop.resize(population_size);
-                if(j%100==0&&phase>1){
+                if(j%200==0&&phase>2){
                     printf("fitness : %d\n",pop[0].value);
                     pop[0].print();
                 }
@@ -98,8 +108,13 @@ int main(){
             pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end());            
             
             printf("end phase : %d\n",phase);
-
-            if(phase==2)
+            
+            //reset the fitness value
+            for(auto &x:pop)
+                x.fitness();
+            // for(auto x:pop)
+            //     printf("%d\n",x.value);
+            if(phase==3)
                 break;
             expansion();
         }
