@@ -353,6 +353,43 @@ struct Rubik{
                 right &= (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
             phase+=right;
         }
+        else if(phase==4){
+            bool right=1;
+            for(int i=0;i<6;i++)
+                right&=state[i][5]==state[i][6]&&state[i][6]==state[i][9]&&state[i][9]==state[i][10];
+            
+            // same as phase3
+            right &= (state[0][4]==state[0][8]) && (state[3][7]==state[3][11]);
+
+            for(auto x : {0, 1, 2})
+                right &= (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
+            //
+            // up
+            right &= (state[0][1]==state[0][2])&& state[4][4]==state[4][8];
+            right &= (state[1][1]==state[1][2])&& state[4][13]==state[4][14];
+            right &= (state[2][1]==state[2][2])&& state[4][7]==state[4][11];
+            right &= (state[3][1]==state[3][2])&& state[4][1]==state[4][2];
+            //
+            //down
+            right &= state[0][13]==state[0][14]&&state[5][4]==state[5][8];
+            right &= state[1][13]==state[1][14]&&state[5][1]==state[5][2];
+            right &= state[2][13]==state[2][14]&&state[5][7]==state[5][11];
+            right &= state[3][13]==state[3][14]&&state[5][13]==state[5][14];
+            
+            //
+
+            phase+=right;
+        }
+    }
+    int parity_U(int a,int b){
+        char up=hash(a),down=hash(b);
+        if(up=='O'||up=='R')
+            return 0;// bad
+        if(up=='G'||up=='B'){
+            if(down=='Y'||down=='W')
+                return 0;//bad
+        }
+        return 1;
     }
     void fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
         value=0;
@@ -363,7 +400,7 @@ struct Rubik{
             }
 
         }
-        else if(phase==2){// max : 24
+        else if(phase==2){// max : 24+ 4*3 = 24 + 12 = 36
             for(auto x : {5, 6, 9, 10}) {
                 value += (state[0][x] == 0 || state[0][x] == 2);
                 value += (state[2][x] == 0 || state[2][x] == 2);
@@ -374,6 +411,33 @@ struct Rubik{
                 value += (state[4][x] == 4 || state[4][x] == 5);
                 value += (state[5][x] == 4 || state[5][x] == 5);
             }
+            //parity check for U faces
+            // value+=(parity_U(state[4][4],state[0][1])!=parity_U(state[4][8],state[0][2]));
+
+            // value+=(parity_U(state[4][13],state[1][1])!=parity_U(state[4][14],state[1][2]));
+
+            // value+=(parity_U(state[4][11],state[2][1])!=parity_U(state[4][7],state[2][2]));
+
+            // value+=(parity_U(state[4][2],state[3][1])!=parity_U(state[4][1],state[3][2]));
+            
+            // //parity check for D faces
+            // value+=(parity_U(state[5][4],state[0][14])!=parity_U(state[5][8],state[0][13]));
+
+            // value+=(parity_U(state[5][13],state[3][14])!=parity_U(state[5][14],state[3][13]));
+
+            // value+=(parity_U(state[5][11],state[2][14])!=parity_U(state[5][7],state[2][13]));
+
+            // value+=(parity_U(state[5][2],state[1][14])!=parity_U(state[5][1],state[1][13]));
+
+            // //parity check for F faces
+            // value+=(parity_U(state[1][4],state[0][7])!=parity_U(state[1][8],state[0][11]));
+
+            // value+=(parity_U(state[1][7],state[2][4])!=parity_U(state[1][11],state[2][8]));
+
+            // //parity check for B faces
+            // value+=(parity_U(state[3][4],state[2][7])!=parity_U(state[3][8],state[2][11]));
+
+            // value+=(parity_U(state[3][7],state[0][4])!=parity_U(state[3][11],state[0][8]));
         }
         else if(phase==3){// max : 12 + 4 = 16 
             for(auto x : {0, 1}){
@@ -401,6 +465,34 @@ struct Rubik{
 
             for(auto x : {0, 1, 2})
                 value += (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
+        }
+        else if(phase==4){//max : 6 + 12 = 18
+            int tmp;
+            for(int i=0;i<6;i++)
+                value +=state[i][5]==state[i][6]&&state[i][6]==state[i][9]&&state[i][9]==state[i][10];
+            tmp=value;
+            // same as phase3
+            value += (state[0][4]==state[0][8]) && (state[3][7]==state[3][11]);
+
+            for(auto x : {0, 1, 2})
+                value += (state[x][7]==state[x][11]) && (state[x+1][4]==state[x+1][8]);
+            
+            //
+            // up
+            value += (state[0][1]==state[0][2])&& state[4][4]==state[4][8];
+            // value += (state[1][1]==state[1][2])&& state[4][13]==state[4][14];//
+            value += (state[2][1]==state[2][2])&& state[4][7]==state[4][11];
+            value += (state[3][1]==state[3][2])&& state[4][1]==state[4][2];
+            
+            //down
+            value += state[0][13]==state[0][14]&&state[5][4]==state[5][8];
+            // value += state[1][13]==state[1][14]&&state[5][1]==state[5][2];//
+            value += state[2][13]==state[2][14]&&state[5][7]==state[5][11];
+            value += state[3][13]==state[3][14]&&state[5][13]==state[5][14];
+            // value = (value-tmp)*3 +tmp;
+            //
+            tmp=value;
+            value += 10*(tmp==16&&(state[1][1]==state[1][2])&& state[4][13]==state[4][14]&&state[1][13]==state[1][14]&&state[5][1]==state[5][2]);
         }
     }
 };

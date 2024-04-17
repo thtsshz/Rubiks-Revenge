@@ -1,2 +1,5 @@
-rubik.exe
-transformer.exe
+.vscode/
+package-lock.json
+package.json
+*.exe
+*.o
