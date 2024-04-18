@@ -148,7 +148,7 @@ int main(){
                 population_size=4000;
                 generation = 2000;
             }
-            if(phase==4)
+            if(phase==5)
                 break;
             expansion();
         }

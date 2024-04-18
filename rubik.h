@@ -298,7 +298,18 @@ struct Rubik{
                 assert(0);
             break;
         }
+    }    
+    int parity_U(int a,int b){
+        char up=hash(a),down=hash(b);
+        if(up=='O'||up=='R')
+            return 0;// bad
+        if(up=='G'||up=='B'){
+            if(down=='Y'||down=='W')
+                return 0;//bad
+        }
+        return 1;
     }
+
     void phase_check(){
         if(phase==1){
             bool right=1;
@@ -380,16 +391,37 @@ struct Rubik{
 
             phase+=right;
         }
-    }
-    int parity_U(int a,int b){
-        char up=hash(a),down=hash(b);
-        if(up=='O'||up=='R')
-            return 0;// bad
-        if(up=='G'||up=='B'){
-            if(down=='Y'||down=='W')
-                return 0;//bad
+        else if(phase==5){
+            bool right=1;
+            right&=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
+
+            right&=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
+
+            right&=(parity_U(state[4][11],state[2][1])&&parity_U(state[4][7],state[2][2]));
+
+            right&=(parity_U(state[4][2],state[3][1])&&parity_U(state[4][1],state[3][2]));
+            
+            // //parity check for D faces
+            right&=(parity_U(state[5][4],state[0][14])&&parity_U(state[5][8],state[0][13]));
+
+            right&=(parity_U(state[5][13],state[3][14])&&parity_U(state[5][14],state[3][13]));
+
+            right&=(parity_U(state[5][11],state[2][14])&&parity_U(state[5][7],state[2][13]));
+
+            right&=(parity_U(state[5][2],state[1][14])&&parity_U(state[5][1],state[1][13]));
+
+            // //parity check for F faces
+            right&=(parity_U(state[1][4],state[0][7])&&parity_U(state[1][8],state[0][11]));
+
+            right&=(parity_U(state[1][7],state[2][4])&&parity_U(state[1][11],state[2][8]));
+
+            // //parity check for B faces
+            right&=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
+
+            right&=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
+            phase+=right;
+
         }
-        return 1;
     }
     void fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
         value=0;
@@ -493,6 +525,34 @@ struct Rubik{
             //
             tmp=value;
             value += 10*(tmp==16&&(state[1][1]==state[1][2])&& state[4][13]==state[4][14]&&state[1][13]==state[1][14]&&state[5][1]==state[5][2]);
+        }
+        else if(phase==5){
+            value+=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
+
+            value+=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
+
+            value+=(parity_U(state[4][11],state[2][1])&&parity_U(state[4][7],state[2][2]));
+
+            value+=(parity_U(state[4][2],state[3][1])&&parity_U(state[4][1],state[3][2]));
+            
+            // //parity check for D faces
+            value+=(parity_U(state[5][4],state[0][14])&&parity_U(state[5][8],state[0][13]));
+
+            value+=(parity_U(state[5][13],state[3][14])&&parity_U(state[5][14],state[3][13]));
+
+            value+=(parity_U(state[5][11],state[2][14])&&parity_U(state[5][7],state[2][13]));
+
+            value+=(parity_U(state[5][2],state[1][14])&&parity_U(state[5][1],state[1][13]));
+
+            // //parity check for F faces
+            value+=(parity_U(state[1][4],state[0][7])&&parity_U(state[1][8],state[0][11]));
+
+            value+=(parity_U(state[1][7],state[2][4])&&parity_U(state[1][11],state[2][8]));
+
+            // //parity check for B faces
+            value+=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
+
+            value+=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
         }
     }
 };
