@@ -15,6 +15,10 @@ vector<string> G0 = {"R", "L", "F", "B", "U", "D", "r", "l", "f", "b", "u", "d"}
 vector<string> G1 = {"R", "L", "F", "B", "U", "D", "r", "l", "f2", "b2", "u2", "d2"};
 vector<string> G2 = {"R2", "L2", "F", "B", "U", "D", "r2", "l2", "f2", "b2", "u2", "d2"};
 vector<string> G3 = {"R2", "L2", "F2", "B2", "U", "D", "r2", "l2", "f2", "b2"};
+vector<string> G4 = {"R", "L", "F", "B", "U", "D"};
+vector<string> G5 = {"R2", "L2", "F", "B", "U", "D"};
+vector<string> G6 = {"R2", "L2", "F2", "B2", "U", "D"};
+vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 
 const int TEST_NUM=1;
 int population_size=2000;
@@ -39,6 +43,22 @@ Rubik scramble(Rubik r,int len){
             uniform_int_distribution<int> dis(0, (int)G3.size() - 1);
             r.operation(G3[dis(gen)].c_str());
         }
+        else if(r.phase==5){
+            uniform_int_distribution<int> dis(0, (int)G4.size() - 1);
+            r.operation(G4[dis(gen)].c_str());
+        }
+        else if(r.phase==6){
+            uniform_int_distribution<int> dis(0, (int)G5.size() - 1);
+            r.operation(G5[dis(gen)].c_str());
+        }
+        else if(r.phase==7){
+            uniform_int_distribution<int> dis(0, (int)G6.size() - 1);
+            r.operation(G6[dis(gen)].c_str());
+        }
+        else if(r.phase==8){
+            uniform_int_distribution<int> dis(0, (int)G7.size() - 1);
+            r.operation(G7[dis(gen)].c_str());
+        } 
     }   
 
     r.fitness();//necessary!!!
