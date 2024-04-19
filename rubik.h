@@ -9,6 +9,7 @@
 using namespace std;    
 int rotation[16]={12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3};// clockwise rotation
 char hash_map[7] = "OGRBWY";
+int oppo[7]={2,3,0,1,5,4};
 int path[8][4]={2,5,0,4,3,5,1,4,1,5,3,4,0,5,2,4,0,3,2,1,1,2,3,0};
 int indices[12][4][4]={{{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}},{{1,5,9,13},{7,6,5,4},{14,10,6,2},{8,9,10,11}},{{12,8,4,0},{3,7,11,15},{3,7,11,15},{3,7,11,15}},{{13,9,5,1},
 {2,6,10,14},{2,6,10,14},{2,6,10,14}},{{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}},{{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}},{{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}},
@@ -393,6 +394,7 @@ struct Rubik{
         }
         else if(phase==5){
             bool right=1;
+            // //parity check for U faces
             right&=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
 
             right&=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
@@ -421,6 +423,46 @@ struct Rubik{
             right&=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
             phase+=right;
 
+        }
+        else if(phase==6){
+            bool right=1;
+            // placing the edge cubies { White, Yellow } x { Green, Blue } into their slice
+            
+            // corner orientation
+            for(auto x:{0, 3, 12, 15}){
+                for(auto y:{0, 2}){
+                    right&=(state[y][x]==0)||(state[y][x]==2);
+                }
+            }
+            right&=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
+            right&=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
+
+            right&=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
+            right&=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
+
+
+            phase+=right;
+        }
+        else if(phase==7){
+            bool right=1;
+            for(int i=0;i<6;i++){
+                for(int j=0;j<16;j++){
+                    right&=state[i][j]==i||state[i][j]==oppo[i];
+                }
+            }
+            phase+=right;
+        }
+        else if(phase==8){
+            bool right=1;
+            for(int i=0;i<6;i++){
+                for(int j=0;j<16;j++){
+                    right&=state[i][j]==i;
+                }
+            }
+            phase+=right;
+        }
+        else{
+            assert(0);
         }
     }
     void fitness(){// Make sure to call the fitness function once you perform any operation on this Rubik's Cube
@@ -501,7 +543,7 @@ struct Rubik{
         else if(phase==4){//max : 6 + 12 = 18
             int tmp;
             for(int i=0;i<6;i++)
-                value +=state[i][5]==state[i][6]&&state[i][6]==state[i][9]&&state[i][9]==state[i][10];
+                value +=state[i][5]==state[i][6]&&state[i][6]==state[i][9]&&state[i][9]==state[i][10]&&state[i][10]==i;
             tmp=value;
             // same as phase3
             value += (state[0][4]==state[0][8]) && (state[3][7]==state[3][11]);
@@ -553,6 +595,40 @@ struct Rubik{
             value+=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
 
             value+=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
+        }
+        else if(phase==6){
+            // puts("enter");
+            for(auto x:{0, 3, 12, 15}){
+                for(auto y:{0, 2}){
+                    value+=(state[y][x]==0)||(state[y][x]==2);
+                }
+            }
+            value+=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
+            value+=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
+
+            value+=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
+            value+=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
+
+        }
+        else if(phase==7){
+            
+            for(int i=0;i<6;i++){
+                bool temp=1;
+                for(int j=0;j<16;j++){
+                    temp&=state[i][j]==i||state[i][j]==oppo[i];
+                }
+                value+=temp;
+            }
+        }
+        else if(phase==8){
+            for(int i=0;i<6;i++){
+                for(int j=0;j<16;j++){
+                    value+=state[i][j]==i;
+                }
+            }
+        }
+        else{
+            assert(0);
         }
     }
 };

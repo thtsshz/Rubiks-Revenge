@@ -21,9 +21,9 @@ vector<string> G6 = {"R2", "L2", "F2", "B2", "U", "D"};
 vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 
 const int TEST_NUM=1;
-int population_size=2000;
-int generation = 1000;
-
+int population_size = 50000;
+int generation = 350;
+int random_len[10]={10, 10, 10, 15, 7, 13, 15, 17};
 vector<Rubik> pop;
 Rubik scramble(Rubik r,int len){
     while(len--){
@@ -66,6 +66,7 @@ Rubik scramble(Rubik r,int len){
     return r;
 }
 void initialize(Rubik &r){
+    pop.clear();
     for(int i=0;i<population_size;i++){
         pop.push_back(scramble(r,10));
     }
@@ -90,7 +91,7 @@ void f(Rubik &r,char *str){
     r.fitness();
 }
 void mutation(Rubik &r){
-    uniform_int_distribution<int> dis(1, 20);
+    uniform_int_distribution<int> dis(1, random_len[r.phase-1]);
     int len=dis(gen);//generate the length of operation
 
     if(r.phase==4&&r.value==16){
@@ -116,11 +117,13 @@ int main(){
         puts("original:");
         r.print();
         // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
-
+        jump:
         initialize(r);
-        
+        population_size=50000;
+        generation = 350;
         for(int phase = 1; phase < 9 ; phase++){
             printf("start phase : %d\n",phase);
+
             for(int j=0;j<generation;j++){
                 vector<Rubik> offspring;
                 for(int k=0;k<population_size;k++){
@@ -132,25 +135,41 @@ int main(){
                 pop.insert(pop.end(), offspring.begin(), offspring.end());
                 sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
                 pop.resize(population_size);
+                if(j%200==0&&phase==7){
+                    printf("fitness : %d\n",pop[0].value);
+                    pop[0].print();
+
+                }
             }
             
             for(auto &x:pop)
                 x.phase_check();//check and modify the phase
             auto condition = [&](const auto& x) { return x.phase == phase;};
-            pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end());            
+            pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end()); 
+            if(!pop.size()){
+                printf("redo on phase : %d\n",phase);// should be restart
+                goto jump;
+            }
+            printf("remain: %d\n",(int)pop.size());        
+            printf("fitness: %d\n",(int)pop[0].value);        
             pop[0].print();
-            printf("end phase : %d\n",phase);
-            
             //reset the fitness value
             for(auto &x:pop)
                 x.fitness();
-            if(phase==2){
-                population_size=4000;
-                generation = 2000;
-            }
-            if(phase==5)
-                break;
+            // if(phase==2){
+            //     population_size*=2;
+            //     generation*=2;
+            // }
+            // if(phase==4){
+            //     population_size*=2;
+            //     generation*=2;
+
+            // }
+            // if(phase==8)
+            //     break;
             expansion();
+            printf("end phase : %d\n",phase);
+
         }
     }
 }
