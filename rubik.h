@@ -300,7 +300,7 @@ struct Rubik{
             break;
         }
     }    
-    int parity_U(int a,int b){
+    bool parity_U(int a,int b){
         char up=hash(a),down=hash(b);
         if(up=='O'||up=='R')
             return 0;// bad
@@ -310,7 +310,9 @@ struct Rubik{
         }
         return 1;
     }
-
+    bool check(int color, int target){
+        return color==target||color==oppo[target];
+    }
     void phase_check(){
         if(phase==1){
             bool right=1;
@@ -426,6 +428,32 @@ struct Rubik{
         }
         else if(phase==6){
             bool right=1;
+            right&=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
+
+            right&=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
+
+            right&=(parity_U(state[4][11],state[2][1])&&parity_U(state[4][7],state[2][2]));
+
+            right&=(parity_U(state[4][2],state[3][1])&&parity_U(state[4][1],state[3][2]));
+            
+            // //parity check for D faces
+            right&=(parity_U(state[5][4],state[0][14])&&parity_U(state[5][8],state[0][13]));
+
+            right&=(parity_U(state[5][13],state[3][14])&&parity_U(state[5][14],state[3][13]));
+
+            right&=(parity_U(state[5][11],state[2][14])&&parity_U(state[5][7],state[2][13]));
+
+            right&=(parity_U(state[5][2],state[1][14])&&parity_U(state[5][1],state[1][13]));
+
+            // //parity check for F faces
+            right&=(parity_U(state[1][4],state[0][7])&&parity_U(state[1][8],state[0][11]));
+
+            right&=(parity_U(state[1][7],state[2][4])&&parity_U(state[1][11],state[2][8]));
+
+            // //parity check for B faces
+            right&=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
+
+            right&=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
             // placing the edge cubies { White, Yellow } x { Green, Blue } into their slice
             
             // corner orientation
@@ -598,6 +626,32 @@ struct Rubik{
         }
         else if(phase==6){
             // puts("enter");
+            value+=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
+
+            value+=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
+
+            value+=(parity_U(state[4][11],state[2][1])&&parity_U(state[4][7],state[2][2]));
+
+            value+=(parity_U(state[4][2],state[3][1])&&parity_U(state[4][1],state[3][2]));
+            
+            // //parity check for D faces
+            value+=(parity_U(state[5][4],state[0][14])&&parity_U(state[5][8],state[0][13]));
+
+            value+=(parity_U(state[5][13],state[3][14])&&parity_U(state[5][14],state[3][13]));
+
+            value+=(parity_U(state[5][11],state[2][14])&&parity_U(state[5][7],state[2][13]));
+
+            value+=(parity_U(state[5][2],state[1][14])&&parity_U(state[5][1],state[1][13]));
+
+            // //parity check for F faces
+            value+=(parity_U(state[1][4],state[0][7])&&parity_U(state[1][8],state[0][11]));
+
+            value+=(parity_U(state[1][7],state[2][4])&&parity_U(state[1][11],state[2][8]));
+
+            // //parity check for B faces
+            value+=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
+
+            value+=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
             for(auto x:{0, 3, 12, 15}){
                 for(auto y:{0, 2}){
                     value+=(state[y][x]==0)||(state[y][x]==2);
@@ -619,6 +673,21 @@ struct Rubik{
                 }
                 value+=temp;
             }
+            // U
+            int cur=value;
+            value+=check(state[4][0],4)&&check(state[0][0],0)&&check(state[3][3],3);
+            value+=check(state[4][3],4)&&check(state[2][3],2)&&check(state[3][0],3);
+            value+=check(state[1][0],1)&&check(state[0][3],0)&&check(state[4][12],4);
+            value+=check(state[1][3],1)&&check(state[2][0],2)&&check(state[4][15],4);
+            
+            // D
+            value+=check(state[5][12],5)&&check(state[0][12],0)&&check(state[3][15],3);
+            value+=check(state[5][15],5)&&check(state[2][15],2)&&check(state[3][12],3);
+            
+            value+=check(state[1][12],1)&&check(state[0][15],0)&&check(state[5][0],5);
+            value+=check(state[1][15],1)&&check(state[2][12],2)&&check(state[5][3],5);
+            
+            value=cur+(value-cur)*5;
         }
         else if(phase==8){
             for(int i=0;i<6;i++){

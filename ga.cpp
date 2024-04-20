@@ -23,7 +23,7 @@ vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 const int TEST_NUM=1;
 int population_size = 50000;
 int generation = 350;
-int random_len[10]={10, 10, 10, 15, 7, 13, 15, 17};
+int random_len[10]={10, 10, 10, 15, 10, 13, 20, 17};
 vector<Rubik> pop;
 Rubik scramble(Rubik r,int len){
     while(len--){
@@ -116,17 +116,19 @@ int main(){
         Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFfFfBUURrRrUuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
         puts("original:");
         r.print();
-        // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
         jump:
+
+        // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
         initialize(r);
-        population_size=50000;
-        generation = 350;
+        population_size=10000;
+        generation = 200;            
+
         for(int phase = 1; phase < 9 ; phase++){
             printf("start phase : %d\n",phase);
 
             for(int j=0;j<generation;j++){
                 vector<Rubik> offspring;
-                for(int k=0;k<population_size;k++){
+                for(int k=0;k<population_size*5;k++){
                     Rubik x=tournament_selection(3);
                     assert(x.phase==phase);
                     mutation(x);
@@ -135,7 +137,7 @@ int main(){
                 pop.insert(pop.end(), offspring.begin(), offspring.end());
                 sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
                 pop.resize(population_size);
-                if(j%200==0&&phase==7){
+                if(j%100==0&&phase==7){
                     printf("fitness : %d\n",pop[0].value);
                     pop[0].print();
 
@@ -156,10 +158,14 @@ int main(){
             //reset the fitness value
             for(auto &x:pop)
                 x.fitness();
-            // if(phase==2){
-            //     population_size*=2;
-            //     generation*=2;
-            // }
+            if(phase==3){
+
+                population_size+=5000;
+                generation*=2;
+            }
+            if(phase==6){
+                generation*=2;
+            }
             // if(phase==4){
             //     population_size*=2;
             //     generation*=2;
