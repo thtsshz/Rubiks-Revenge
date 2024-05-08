@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include<fstream>
 #include<string>
 using namespace std;
 /*
@@ -70,10 +71,41 @@ string transformer(string input){
 };
 
 
+// int main(){
+//     string input;
+//     cout << "Enter a sentence: ";
+//     getline(cin, input);
+//     cout << transformer(input);
+//     return 0;
+// }
+
 int main(){
-    string input;
-    cout << "Enter a sentence: ";
-    getline(cin, input);
-    cout << transformer(input);
+    ifstream input_file("merged.txt");
+    ofstream output_file("output.txt");
+
+    if (!input_file) {
+        cerr << "Error: Unable to open input file 'merged.txt'" << endl;
+        return 1;
+    }
+
+    if (!output_file) {
+        cerr << "Error: Unable to open output file 'output.txt'" << endl;
+        return 1;
+    }
+
+    string line;
+    // Read each line from the input file
+    while (getline(input_file, line)) {
+        // Transform the line
+        string transformed_line = transformer(line);
+        // Write the transformed line to the output file
+        output_file << transformed_line << endl;
+    }
+
+    cout << "Transformation completed." << endl;
+
+    input_file.close();
+    output_file.close();
+
     return 0;
 }
