@@ -457,18 +457,24 @@ struct Rubik{
             // placing the edge cubies { White, Yellow } x { Green, Blue } into their slice
             
             // corner orientation
-            for(auto x:{0, 3, 12, 15}){
-                for(auto y:{0, 2}){
-                    right&=(state[y][x]==0)||(state[y][x]==2);
+            // for(auto x:{0, 3, 12, 15}){
+            //     for(auto y:{0, 2}){
+            //         right&=(state[y][x]==0)||(state[y][x]==2);
+            //     }
+            // }
+            // right&=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
+            // right&=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
+
+            // right&=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
+            // right&=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
+
+
+            // phase+=right;
+            for(auto x:{4,5}){
+                for(int j=0;j<16;j++){
+                    right&=(state[x][j]==x||state[x][j]==oppo[x]);
                 }
             }
-            right&=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
-            right&=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
-
-            right&=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
-            right&=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
-
-
             phase+=right;
         }
         else if(phase==7){
@@ -652,26 +658,42 @@ struct Rubik{
             value+=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
 
             value+=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
+            //corner
             for(auto x:{0, 3, 12, 15}){
-                for(auto y:{0, 2}){
-                    value+=(state[y][x]==0)||(state[y][x]==2);
+                for(auto y:{4, 5}){
+                    value+=(state[y][x]==4)||(state[y][x]==5);
                 }
             }
-            value+=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
-            value+=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
+            //edge
+            for(auto x:{1, 4, 7, 13}){
+                for(auto y:{4,5}){
+                    value+=(state[y][x]==4)||(state[y][x]==5);
+                }
+            }
+            // value+=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
+            // value+=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
 
-            value+=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
-            value+=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
-
+            // value+=(state[1][13]!=0&&state[1][13]!=2)&&(state[5][1]!=0&&state[5][1]!=2);
+            // value+=(state[5][13]!=0&&state[5][13]!=2)&&(state[3][13]!=0&&state[3][13]!=2);
+            //  for(auto x:{4,5}){
+            //     bool right=1;
+            //     for(int j=0;j<16;j++){
+            //         right&=(state[x][j]==x||state[x][j]==oppo[x]);
+            //     }
+            //     value+=right;
+            // }
         }
         else if(phase==7){
             
             for(int i=0;i<6;i++){
-                bool temp=1;
+                int temp=1;
                 for(int j=0;j<16;j++){
                     temp&=state[i][j]==i||state[i][j]==oppo[i];
                 }
-                value+=temp;
+                // if(i>3)
+                //     value+=3*temp;
+                // // else
+                    value+=temp;
             }
             // U
             int cur=value;
@@ -687,7 +709,7 @@ struct Rubik{
             value+=check(state[1][12],1)&&check(state[0][15],0)&&check(state[5][0],5);
             value+=check(state[1][15],1)&&check(state[2][12],2)&&check(state[5][3],5);
             
-            value=cur+(value-cur)*5;
+            // value=cur+(value-cur)*5;
         }
         else if(phase==8){
             for(int i=0;i<6;i++){
