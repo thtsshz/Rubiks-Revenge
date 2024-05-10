@@ -713,9 +713,11 @@ struct Rubik{
         }
         else if(phase==8){
             for(int i=0;i<6;i++){
+                int temp=1;
                 for(int j=0;j<16;j++){
-                    value+=state[i][j]==i;
+                    temp&=(state[i][j]==i);
                 }
+                value+=temp;
             }
         }
         else{

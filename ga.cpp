@@ -130,11 +130,27 @@ void mutation(Rubik &r){
     r=scramble(r,len);
 }
 void expansion(){//expand the size of pop to population_size
-    int sz=(int)pop.size();
-    while((int)pop.size() < population_size){
+    while((int)pop.size() < population_size){    
+        int sz=(int)pop.size();
         uniform_int_distribution<int> dis(0, sz - 1);
         auto r = pop[dis(gen)];
         pop.emplace_back(scramble(r,10));
+    }
+}
+void adjust_parameter(int phase){
+    //
+    if(!phase){
+        population_size = 2500;
+        generation = 100;
+        
+    }
+    else if(phase==2){
+        population_size = 4500;
+        generation = 200;   
+    }
+    else if(phase==3){
+        population_size += 2500;
+        generation*=2;
     }
 }
 int main(){
@@ -160,8 +176,7 @@ int main(){
 
             // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
             initialize(r);
-            population_size=10000;
-            generation = 200;            
+            adjust_parameter(0);         
             int phase;
             for(phase = 1; phase < 9 ; phase++){
                 if(DISPLAY)
@@ -169,7 +184,7 @@ int main(){
 
                 for(int j=0;j<generation;j++){
                     vector<Rubik> offspring;
-                    for(int k=0;k<population_size*5;k++){
+                    for(int k=0;k<population_size*10;k++){
                         Rubik x=tournament_selection(3);
                         assert(x.phase==phase);
                         mutation(x);
@@ -206,15 +221,7 @@ int main(){
                     for(auto &x:pop)
                         x.fitness();
                 }
-                
-                if(phase==3){
-
-                    population_size+=5000;
-                    generation*=2;
-                }
-                if(phase==6){
-                    generation*=2;
-                }
+                adjust_parameter(phase);
                 // if(phase==4){
                 //     population_size*=2;
                 //     generation*=2;
