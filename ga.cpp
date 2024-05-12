@@ -185,8 +185,8 @@ int main(){
             auto start = std::chrono::high_resolution_clock::now();
 
             fgets(operation, MAX_SEQUENCE_LENGTH, file);
-            operation[strlen(operation)-1]='\0'; 
-            puts(operation);
+            operation[strlen(operation)-1]='\0';
+            printf("%d : %s\n",t+1, operation); 
             redo:
             Rubik r(operation);
             if(DISPLAY){
