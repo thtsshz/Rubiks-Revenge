@@ -171,6 +171,8 @@ void adjust_parameter(int phase){
 }
 int main(){
     char operation[MAX_SEQUENCE_LENGTH];
+    vector<double> durations;
+
     FILE *file = fopen("testcase/testcases_op.txt", "r");
     if (file == NULL) {
         perror("Failed to open file");
@@ -286,15 +288,22 @@ int main(){
             // fail_phase[phase]++;
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> duration = end - start;
-
+            durations.push_back(duration.count());
             totalDuration += duration.count();
             printf("Execution time: %f seconds\n", duration.count());
 
         }
 
     }
+    double averageDuration = totalDuration/(double)TEST_NUM;
     printf("Execution time: %f seconds for %d testcases\n", totalDuration,TEST_NUM);
-    printf("Average execution time: %f seconds\n", totalDuration/(double)TEST_NUM);
+    printf("Average execution time: %f seconds\n", averageDuration);
+    double squaredDifferencesSum = 0.0;
+    for (double duration : durations) {
+        squaredDifferencesSum += (duration - averageDuration) * (duration - averageDuration);
+    }
+    printf("Standard deviation: %f seconds\n", sqrt(squaredDifferencesSum / TEST_NUM));
+
     // for(int i=1;i<10;i++){
     //     printf("%d : %d\n",i,fail_phase[i]);
     // }
