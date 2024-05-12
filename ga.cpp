@@ -23,7 +23,7 @@ vector<string> G5 = {"R2", "L2", "F", "B", "U", "D"};
 vector<string> G6 = {"R2", "L2", "F2", "B2", "U", "D"};
 vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 const bool DISPLAY=false;
-const int TEST_NUM=1;
+const int TEST_NUM=100;
 const int MAX_SEQUENCE_LENGTH=200;
 int population_size = 2500;
 int generation = 350;
@@ -88,7 +88,7 @@ Rubik tournament_selection(int sz){
         return a.value > b.value; // Compare directly to find the maximum
     });
 }
-void f(Rubik &r,char *str){
+void f(Rubik &r,const char *str){
     for(int i=0; str[i];i++){
         char tmp[2]={str[i],'\0'};
         r.operation(tmp);
@@ -176,8 +176,12 @@ int main(){
         perror("Failed to open file");
         return 1;
     }
-    for(int i=0;i<TEST_NUM;i++){
-        for(int t=0;t<50;t++){
+    double totalDuration = 0.0;
+
+    for(int i=0;i<1;i++){
+        for(int t=0;t<TEST_NUM;t++){        \
+            auto start = std::chrono::high_resolution_clock::now();
+
             fgets(operation, MAX_SEQUENCE_LENGTH, file);
             operation[strlen(operation)-1]='\0'; 
             puts(operation);
@@ -280,9 +284,17 @@ int main(){
             printf("\033[0m"); // Reset color
             // printf("%d\n",phase);
             // fail_phase[phase]++;
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> duration = end - start;
+
+            totalDuration += duration.count();
+            printf("Execution time: %f seconds\n", duration.count());
+
         }
 
     }
+    printf("Execution time: %f seconds for %d testcases\n", totalDuration,TEST_NUM);
+    printf("Average execution time: %f seconds\n", totalDuration/(double)TEST_NUM);
     // for(int i=1;i<10;i++){
     //     printf("%d : %d\n",i,fail_phase[i]);
     // }
