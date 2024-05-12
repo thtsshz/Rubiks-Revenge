@@ -488,9 +488,9 @@ struct Rubik{
         }
         else if(phase==8){
             bool right=1;
-            for(int i=0;i<6;i++){
+            for(auto x:{0,2,4,5}){
                 for(int j=0;j<16;j++){
-                    right&=state[i][j]==i;
+                    right&=state[x][j]==x;
                 }
             }
             phase+=right;
@@ -587,25 +587,25 @@ struct Rubik{
             
             //
             // up
-            value += (state[0][1]==state[0][2])&& state[4][4]==state[4][8];
-            // value += (state[1][1]==state[1][2])&& state[4][13]==state[4][14];//
-            value += (state[2][1]==state[2][2])&& state[4][7]==state[4][11];
+            // value += (state[0][1]==state[0][2])&& state[4][4]==state[4][8];
+            value += (state[1][1]==state[1][2])&& state[4][13]==state[4][14];//
+            // value += (state[2][1]==state[2][2])&& state[4][7]==state[4][11];
             value += (state[3][1]==state[3][2])&& state[4][1]==state[4][2];
             
             //down
             value += state[0][13]==state[0][14]&&state[5][4]==state[5][8];
-            // value += state[1][13]==state[1][14]&&state[5][1]==state[5][2];//
+            value += state[1][13]==state[1][14]&&state[5][1]==state[5][2];//
             value += state[2][13]==state[2][14]&&state[5][7]==state[5][11];
             value += state[3][13]==state[3][14]&&state[5][13]==state[5][14];
             // value = (value-tmp)*3 +tmp;
             //
             tmp=value;
-            value += 10*(tmp==16&&(state[1][1]==state[1][2])&& state[4][13]==state[4][14]&&state[1][13]==state[1][14]&&state[5][1]==state[5][2]);
+            value += 10*(tmp==16&&(state[0][1]==state[0][2])&& state[4][4]==state[4][8]&&(state[2][1]==state[2][2])&& state[4][7]==state[4][11]);
         }
         else if(phase==5){
             value+=(parity_U(state[4][4],state[0][1])&&parity_U(state[4][8],state[0][2]));
 
-            value+=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
+            // value+=(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2]));
 
             value+=(parity_U(state[4][11],state[2][1])&&parity_U(state[4][7],state[2][2]));
 
@@ -629,6 +629,9 @@ struct Rubik{
             value+=(parity_U(state[3][4],state[2][7])&&parity_U(state[3][8],state[2][11]));
 
             value+=(parity_U(state[3][7],state[0][4])&&parity_U(state[3][11],state[0][8]));
+            int tmp=value;
+            value += 20*(tmp==11&&(parity_U(state[4][13],state[1][1])&&parity_U(state[4][14],state[1][2])));
+
         }
         else if(phase==6){
             // puts("enter");

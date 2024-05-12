@@ -25,7 +25,7 @@ vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 const bool DISPLAY=false;
 const int TEST_NUM=1;
 const int MAX_SEQUENCE_LENGTH=200;
-int population_size = 50000;
+int population_size = 2500;
 int generation = 350;
 int random_len[10]={10, 10, 10, 15, 10, 13, 20, 17};
 int fail_phase[10]={0};
@@ -71,6 +71,7 @@ Rubik scramble(Rubik r,int len){
     return r;
 }
 void initialize(Rubik &r){
+    pop.clear();
     for(int i=0;i<population_size;i++){
         pop.push_back(scramble(r,10));
     }
@@ -78,7 +79,7 @@ void initialize(Rubik &r){
     //     pop[i].print();
 }
 Rubik tournament_selection(int sz){
-    uniform_int_distribution<int> dis(0, population_size - 1);
+    uniform_int_distribution<int> dis(0, (int)pop.size() - 1);
     vector<Rubik> temp;
     while(sz--)
         temp.push_back(pop[dis(gen)]);
@@ -99,10 +100,21 @@ void mutation(Rubik &r){
     int len=dis(gen);//generate the length of operation
 
     if(r.phase==4&&r.value==16){
+        Rubik temp=r,temp2=r;
+        // U -> B
+        // F -> U
+        // R is the same
+        // R F' U F
+        f(temp,"LFFFUFRLLL");
+        // Dd R FFF U RRR F DDDddd
+        f(temp2, "LRRRDdRFFFURRRFDDDdddRLLL");        // R U R' F R' F' R
+        pop.push_back(temp);
+        pop.push_back(temp2);
+    }
+    if(r.phase==5&&r.value==11){
         Rubik temp=r;
-        // FRF'UR'F
-        f(temp,"FRFFFURRRFdRFFFURRRFddd");
-        //d R F' U R' F d'
+        // r2 B2 U2 l U2 r' U2 r U2 F2 r F2 l' B2 r2
+        f(temp,"rrBBUUlUUrrrUUrUUFFrFFlllBBrr");
         pop.push_back(temp);
     }
     if(r.phase==7&&(r.value==10000||r.value==10002)){
@@ -127,6 +139,14 @@ void mutation(Rubik &r){
         f(temp,"UUuuLLllUUllUULLllUUuu");
         pop.push_back(temp);
     }
+    if(r.phase==8&&r.value==4){
+        Rubik temp=r;
+
+        // (Uu)2 (Ll)2' U2 l2' U2 (Ll)2' (Uu)2 
+        f(temp,"UUuuLLllUUllUULLllUUuu");
+        pop.push_back(temp);
+
+    }
     r=scramble(r,len);
 }
 void expansion(){//expand the size of pop to population_size
@@ -139,18 +159,14 @@ void expansion(){//expand the size of pop to population_size
 }
 void adjust_parameter(int phase){
     //
-    if(!phase){
+    if(phase<4){
         population_size = 2500;
         generation = 100;
         
     }
-    else if(phase==2){
-        population_size = 4500;
-        generation = 200;   
-    }
-    else if(phase==3){
-        population_size += 2500;
-        generation*=2;
+    else{
+        population_size = 5000;
+        generation = 200;
     }
 }
 int main(){
@@ -162,26 +178,36 @@ int main(){
     }
     for(int i=0;i<TEST_NUM;i++){
         for(int t=0;t<50;t++){
-            pop.clear();
             fgets(operation, MAX_SEQUENCE_LENGTH, file);
             operation[strlen(operation)-1]='\0'; 
             puts(operation);
+            redo:
             Rubik r(operation);
             if(DISPLAY){
                 puts("original:");
                 r.print();
             }
-            
-            jump:
+            int first_time[10]={0};
+
 
             // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
             initialize(r);
-            adjust_parameter(0);         
             int phase;
             for(phase = 1; phase < 9 ; phase++){
-                if(DISPLAY)
-                    printf("start phase : %d\n",phase);
+                if(!first_time[phase]){
+                    printf("\rsolve phase : %d    ",phase);
 
+                }
+                    adjust_parameter(phase);         
+                first_time[phase]++;
+                if(first_time[phase]>2){//redo
+                    initialize(r);
+                    puts("\nredo");
+                    goto redo;
+                }
+                // if(DISPLAY)
+                    // printf("start phase : %d\n",phase);
+                expansion();
                 for(int j=0;j<generation;j++){
                     vector<Rubik> offspring;
                     for(int k=0;k<population_size*10;k++){
@@ -193,52 +219,71 @@ int main(){
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
                     sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
                     pop.resize(population_size);
-                    // if(j%50==0&&phase==7){
-                    //     printf("fitness : %d\n",pop[0].value);
-                    //     pop[0].print();
-
-                    // }
                 }
-                
+                auto restore = pop;
                 for(auto &x:pop)
                     x.phase_check();//check and modify the phase
                 auto condition = [&](const auto& x) { return x.phase == phase;};
                 pop.erase(remove_if(pop.begin(), pop.end(), condition), pop.end()); 
                 if(!pop.size()){
+                    pop = restore;
                     // printf("redo on phase : %d\n",phase);// should be restart
-                    // goto jump;
-                    break;
+                    // printf("fitness: %d %d\n",(int)pop[0].value, (int)pop[1].value);        
+                    // pop[0].print();
+                //     if(phase==4){
+                //         Rubik temp=r,temp2=r;
+                //         // U -> B
+                //         // F -> U
+                //         // R is the same
+                //         // R F' U F
+                //         f(temp,"LFFFUFRLLL");
+                //         // Dd R FFF U RRR F DDDddd
+                //         f(temp2, "LRRRDdRFFFURRRFDDDdddRLLL");        // R U R' F R' F' R
+                //         puts("^^^^^^^^^^^^^^^^^^^^^^^");
+                //         temp2.print();
+                //         temp.print();
+                //         puts("^^^^^^^^^^^^^^^^^^^^^^^");
+
+                //     }
+                //     if(r.phase==8){
+                //         Rubik temp=pop[0];
+
+                //         // (Uu)2 (Ll)2' U2 l2' U2 (Ll)2' (Uu)2 
+                //         puts("^^^^^^^^^^^^^^^^^^^^^^^");
+                //         f(temp,"UUuuLLllUUllUULLllUUuu");
+                //         temp.print();
+                //         puts("^^^^^^^^^^^^^^^^^^^^^^^");
+
+                //     }
+                //     population_size+=2000;
+                //     generation+=100;
+                    phase--;
+                    continue;
+                //     // break;
                 }
-                if(DISPLAY){
-                    printf("remain: %d\n",(int)pop.size());        
-                    printf("fitness: %d\n",(int)pop[0].value);        
-                    pop[0].print();
-                    printf("end phase : %d\n",phase);
-                }
+                // if(DISPLAY){
+                //     printf("remain: %d\n",(int)pop.size());        
+                //     printf("fitness: %d\n",(int)pop[0].value);        
+                //     pop[0].print();
+                //     printf("end phase : %d\n",phase);
+                // }
                 
                 //reset the fitness value
                 if(phase<8){
                     for(auto &x:pop)
                         x.fitness();
                 }
-                adjust_parameter(phase);
-                // if(phase==4){
-                //     population_size*=2;
-                //     generation*=2;
-
-                // }
-                // if(phase==6)
-                //     break;
-                if(phase<8)
-                    expansion();
                 
             }
-            printf("%d\n",phase);
-            fail_phase[phase]++;
+            printf("\033[0;32m");
+            puts("\rfinish                                 ");
+            printf("\033[0m"); // Reset color
+            // printf("%d\n",phase);
+            // fail_phase[phase]++;
         }
 
     }
-    for(int i=1;i<10;i++){
-        printf("%d : %d\n",i,fail_phase[i]);
-    }
+    // for(int i=1;i<10;i++){
+    //     printf("%d : %d\n",i,fail_phase[i]);
+    // }
 }
