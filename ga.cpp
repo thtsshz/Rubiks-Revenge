@@ -149,6 +149,7 @@ void mutation(Rubik &r){
 
     }
     r=scramble(r,len);
+    // printf("%zu ", r.wca_op.size());
 }
 void expansion(){//expand the size of pop to population_size
     while((int)pop.size() < population_size){    
@@ -180,6 +181,7 @@ int main(){
         return 1;
     }
     double totalDuration = 0.0;
+    op_map_init();
 
     for(int i=0;i<1;i++){
         for(int t=0;t<TEST_NUM;t++){        \
@@ -201,6 +203,9 @@ int main(){
             initialize(r);
             int phase;
             for(phase = 1; phase < 9 ; phase++){
+                if(DISPLAY){
+                    printf("min steps: %d\n", pop[0].wca_op.size());
+                }
                 if(!first_time[phase]){
                     printf("\rsolve phase : %d    ",phase);
 
@@ -228,7 +233,10 @@ int main(){
                         if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
                         return a.value > b.value;
                     });
+                    // printf("%d ", pop[0].wca_op.size());
+                    
                     pop.resize(population_size);
+                    
                 }
                 auto restore = pop;
                 for(auto &x:pop)

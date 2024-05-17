@@ -40,6 +40,7 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
         temp.push_back('w');
         temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
         wca_op.push_back(temp);
+        temp = "";
         temp.push_back(fp.first);
         temp.push_back('\'');
         temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
@@ -51,7 +52,7 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
 void st_to_wca() {
     cout << wca_ptr<<' '<<st_ptr << endl;
     bool visited[4] = {0};
-    sort(st.begin() + wca_ptr, st.begin() + st_ptr);
+    sort(st.begin() + wca_ptr, st.begin() + st_ptr,[](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
     pair<char, int> fp={'\0', 0};
     pair<char, int> sp={'\0', 0};
 
@@ -74,7 +75,10 @@ void st_to_wca() {
         pair<char, int> fp={'\0', 0};
         pair<char, int> sp={'\0', 0};
     }
-    wca_ptr = st_ptr;
+    // wca_ptr = st_ptr;
+    st.clear();
+    wca_ptr = 0;
+    st_ptr = 0;
 
     return;
 }

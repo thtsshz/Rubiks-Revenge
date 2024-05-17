@@ -58,13 +58,16 @@ struct Rubik{
     int value;
 
     vector<pair<char, int>> st;
-    int op_cnt;
-    int st_ptr; // index of the last element in the stack
-    int wca_ptr;
+    int st_ptr=-1; // index of the last element in the stack
+    int wca_ptr=0;
     vector<string> wca_op;
     Rubik(){//target state
         phase=1;
         value=0;
+        st_ptr=-1; // index of the last element in the stack
+        wca_ptr=0;
+        st.clear();
+        wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -72,6 +75,10 @@ struct Rubik{
     Rubik(char *op){
         phase=1;
         value=0;
+        st_ptr=-1; // index of the last element in the stack
+        wca_ptr=0;
+        st.clear();
+        wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -284,6 +291,7 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
         temp.push_back('w');
         temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
         wca_op.push_back(temp);
+        temp = "";
         temp.push_back(fp.first);
         temp.push_back('\'');
         temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
@@ -293,10 +301,10 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
 
 
 void st_to_wca() {
-    puts("st_to_wca");
-    cout << wca_ptr<<' '<<st_ptr << endl;
+    // puts("st_to_wca");
+    // cout << wca_ptr<<' '<<st_ptr << endl;
     bool visited[4] = {0};
-    sort(st.begin() + wca_ptr, st.begin() + st_ptr);
+    sort(st.begin() + wca_ptr, st.begin() + st_ptr, [](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
     pair<char, int> fp={'\0', 0};
     pair<char, int> sp={'\0', 0};
 
@@ -319,14 +327,16 @@ void st_to_wca() {
         pair<char, int> fp={'\0', 0};
         pair<char, int> sp={'\0', 0};
     }
-    wca_ptr = st_ptr;
+    st.clear();
+    wca_ptr = 0;
+    st_ptr = 0;
 
     return;
 }
 
 void push_op(const char c){
     // LR UD FB
-    puts("push_op");
+    // puts("push_op");
     int i=0;
     for(i=st_ptr; i>=0; i--){
         if(st[i].first == c){
@@ -354,7 +364,7 @@ void push_op(const char c){
 
 
     void operation(const char *str){
-        puts("operation");
+        // puts("operation");
         push_op(str[0]);
         switch (str[0]){
             case 'L':
@@ -840,7 +850,6 @@ void push_op(const char c){
 };
 
 void op_map_init(){
-    puts("opinit");
     op_map['L'] = "LlRr";
     op_map['l'] = "LlRr";
     op_map['R'] = "LlRr";
@@ -857,8 +866,6 @@ void op_map_init(){
     number_map[1] = '\0';
     number_map[2] =  '2';
     number_map[3] = '\'';
-    puts("opinitfin");
-
 }
 void interative_mode(Rubik &obj){
     puts("---interative_mode---");
