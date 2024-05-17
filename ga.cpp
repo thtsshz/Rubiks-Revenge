@@ -85,6 +85,7 @@ Rubik tournament_selection(int sz){
         temp.push_back(pop[dis(gen)]);
 
     return *max_element(temp.begin(), temp.end(), [](const Rubik& a, const Rubik& b) {
+        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
         return a.value > b.value; // Compare directly to find the maximum
     });
 }
@@ -223,7 +224,10 @@ int main(){
                         offspring.emplace_back(x);
                     }        
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
-                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
+                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {
+                        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
+                        return a.value > b.value;
+                    });
                     pop.resize(population_size);
                 }
                 auto restore = pop;
