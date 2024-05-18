@@ -57,17 +57,20 @@ struct Rubik{
     int phase;
     int value;
 
-    vector<pair<char, int>> st;
+    // vector<pair<char, int>> st;
+    pair<char, int> st[5];
     int st_ptr=-1; // index of the last element in the stack
     int wca_ptr=0;
-    vector<string> wca_op;
+    int op_cnt = 0;
+    // vector<string> wca_op;
     Rubik(){//target state
         phase=1;
         value=0;
         st_ptr=-1; // index of the last element in the stack
         wca_ptr=0;
-        st.clear();
-        wca_op.clear();
+        op_cnt = 0;
+        // st.clear();
+        // wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -77,8 +80,9 @@ struct Rubik{
         value=0;
         st_ptr=-1; // index of the last element in the stack
         wca_ptr=0;
-        st.clear();
-        wca_op.clear();
+        op_cnt = 0;
+        // st.clear();
+        // wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -271,40 +275,40 @@ struct Rubik{
 
     
 void twopairtowca(pair<char,int> fp, pair<char,int> sp){
-    
-    if(fp.second && sp.second){
-        string temp = "";
-        temp.push_back(toupper(fp.first));
-        temp.push_back('w');
-        temp.push_back(number_map[min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+       if(fp.second && sp.second){
+        // string temp = "";
+        // temp.push_back(toupper(fp.first));
+        // temp.push_back('w');
+        // temp.push_back(number_map[min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt++;
     }
     if(fp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt++;
     }
     else if(sp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back('w');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
-        temp = "";
-        temp.push_back(fp.first);
-        temp.push_back('\'');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('w');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        // temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('\'');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt += 2;
     }
 }
 
 
 void st_to_wca() {
-    // puts("st_to_wca");
-    // cout << wca_ptr<<' '<<st_ptr << endl;
     bool visited[4] = {0};
-    sort(st.begin() + wca_ptr, st.begin() + st_ptr, [](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
+    sort(st + wca_ptr, st + st_ptr,[](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
     pair<char, int> fp={'\0', 0};
     pair<char, int> sp={'\0', 0};
 
@@ -312,14 +316,12 @@ void st_to_wca() {
         if(visited[k-wca_ptr]) continue;
         visited[k-wca_ptr] = true;
         fp=st[k];
-        // cout << "fp: " << fp.first << endl;
         
         for(int i=k+1; i<st_ptr; i++){
             if(visited[i-k]) continue;
-            visited[i-k] = true;
             if(toupper(fp.first) == toupper(st[i].first)){
+                visited[i-k] = true;
                 sp = st[i];
-                // cout << "sp: " << sp.first << endl;
                 break;
             }
         }
@@ -327,13 +329,12 @@ void st_to_wca() {
         pair<char, int> fp={'\0', 0};
         pair<char, int> sp={'\0', 0};
     }
-    st.clear();
+    // wca_ptr = st_ptr;
     wca_ptr = 0;
     st_ptr = 0;
 
     return;
 }
-
 void push_op(const char c){
     // LR UD FB
     // puts("push_op");
@@ -342,7 +343,10 @@ void push_op(const char c){
         if(st[i].first == c){
             st[i].second++;
             if(st[i].second == 4){
-                st.erase(st.begin()+i);
+                // st.erase(st.begin()+i);
+                for(int j=i+1; j<=st_ptr; j++){
+                    st[j-1]= st[j];
+                }
                 st_ptr--;
             }
             break;
@@ -351,14 +355,15 @@ void push_op(const char c){
             st_ptr++;
             if(i==st_ptr-1)
                 st_to_wca();
-            st.push_back(make_pair(c, 1));
+            st[st_ptr] = (make_pair(c, 1));
             break;
         }        
     }
     if(i==-1){
         // st_to_wca();
         st_ptr++;
-        st.push_back(make_pair(c, 1));
+        st[st_ptr] = (make_pair(c, 1));
+
     }
 }
 

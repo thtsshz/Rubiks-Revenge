@@ -11,14 +11,15 @@
 #include <ctype.h>
 using namespace std;    
 
-vector<pair<char, int>> st;
+// vector<pair<char, int>> st;
+pair<char, int> st[5];
 unordered_map<char, string> op_map;
 unordered_map<int, char> number_map;
 
-int op_cnt;
 int st_ptr; // index of the last element in the stack
 int wca_ptr;
 vector<string> wca_op;
+int op_cnt = 0;
 
 void twopairtowca(pair<char,int> fp, pair<char,int> sp){
     if(fp.second && sp.second){
@@ -27,12 +28,14 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
         temp.push_back('w');
         temp.push_back(number_map[min(fp.second, sp.second)]);
         wca_op.push_back(temp);
+        op_cnt++;
     }
     if(fp.second - min(fp.second, sp.second)){
         string temp = "";
         temp.push_back(fp.first);
         temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
         wca_op.push_back(temp);
+        op_cnt++;
     }
     else if(sp.second - min(fp.second, sp.second)){
         string temp = "";
@@ -45,14 +48,18 @@ void twopairtowca(pair<char,int> fp, pair<char,int> sp){
         temp.push_back('\'');
         temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
         wca_op.push_back(temp);
+        op_cnt+=2;
     }
 }
 
 
 void st_to_wca() {
     cout << wca_ptr<<' '<<st_ptr << endl;
+        for(auto p:st){
+            printf("%c %d\n", p.first, p.second);
+        }
     bool visited[4] = {0};
-    sort(st.begin() + wca_ptr, st.begin() + st_ptr,[](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
+    sort(st + wca_ptr, st + st_ptr,[](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
     pair<char, int> fp={'\0', 0};
     pair<char, int> sp={'\0', 0};
 
@@ -64,8 +71,8 @@ void st_to_wca() {
         
         for(int i=k+1; i<st_ptr; i++){
             if(visited[i-k]) continue;
-            visited[i-k] = true;
             if(toupper(fp.first) == toupper(st[i].first)){
+                visited[i-k] = true;
                 sp = st[i];
                 cout << "sp: " << sp.first << endl;
                 break;
@@ -76,7 +83,6 @@ void st_to_wca() {
         pair<char, int> sp={'\0', 0};
     }
     // wca_ptr = st_ptr;
-    st.clear();
     wca_ptr = 0;
     st_ptr = 0;
 
@@ -90,7 +96,10 @@ void push_op(const char c){
         if(st[i].first == c){
             st[i].second++;
             if(st[i].second == 4){
-                st.erase(st.begin()+i);
+                // st.erase(st.begin()+i);
+                for(int j=i+1; j<=st_ptr; j++){
+                    st[j-1]= st[j];
+                }
                 st_ptr--;
             }
             break;
@@ -99,14 +108,14 @@ void push_op(const char c){
             st_ptr++;
             if(i==st_ptr-1)
                 st_to_wca();
-            st.push_back(make_pair(c, 1));
+            st[st_ptr] = make_pair(c, 1);
             break;
         }        
     }
     if(i==-1){
         // st_to_wca();
         st_ptr++;
-        st.push_back(make_pair(c, 1));
+        st[st_ptr] = make_pair(c, 1);
     }
 }
 void op_map_init(){
@@ -135,17 +144,16 @@ int main(){
         st_ptr = -1;
         wca_ptr = 0;
         op_map_init();
-        st.clear();
+        // st.clear();
         for (auto c:opers)
             push_op(c);
-        st_to_wca();
-        for(auto p:st){
-            printf("%c %d\n", p.first, p.second);
+        // st_to_wca();
+
+        cout << "total step: " << op_cnt << endl;
+        for (auto i:wca_op){
+            cout << i << endl;
         }
-        cout << "total step: " << wca_op.size() << endl;
-        for(auto s: wca_op){
-            cout << s <<endl;
-        }
+
     }
 
 }

@@ -85,7 +85,7 @@ Rubik tournament_selection(int sz){
         temp.push_back(pop[dis(gen)]);
 
     return *max_element(temp.begin(), temp.end(), [](const Rubik& a, const Rubik& b) {
-        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
+        // if(a.value == b.value)  return a.op_cnt < b.op_cnt;
         return a.value > b.value; // Compare directly to find the maximum
     });
 }
@@ -203,11 +203,9 @@ int main(){
             initialize(r);
             int phase;
             for(phase = 1; phase < 9 ; phase++){
-                if(DISPLAY){
-                    printf("min steps: %d\n", pop[0].wca_op.size());
-                }
                 if(!first_time[phase]){
                     printf("\rsolve phase : %d    ",phase);
+                    printf("min steps: %d\n", pop[0].op_cnt);
 
                 }
                     adjust_parameter(phase);         
@@ -230,10 +228,10 @@ int main(){
                     }        
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
                     sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {
-                        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
+                        // if(a.value == b.value)  return a.op_cnt < b.op_cnt;
                         return a.value > b.value;
                     });
-                    // printf("%d ", pop[0].wca_op.size());
+                    // printf("%d ", pop[0].op_cnt);
                     
                     pop.resize(population_size);
                     
