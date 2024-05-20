@@ -85,6 +85,7 @@ Rubik tournament_selection(int sz){
         temp.push_back(pop[dis(gen)]);
 
     return *max_element(temp.begin(), temp.end(), [](const Rubik& a, const Rubik& b) {
+        if(a.value == b.value)  return a.op_cnt < b.op_cnt;
         return a.value > b.value; // Compare directly to find the maximum
     });
 }
@@ -148,6 +149,7 @@ void mutation(Rubik &r){
 
     }
     r=scramble(r,len);
+    // printf("%zu ", r.wca_op.size());
 }
 void expansion(){//expand the size of pop to population_size
     while((int)pop.size() < population_size){    
@@ -179,6 +181,7 @@ int main(){
         return 1;
     }
     double totalDuration = 0.0;
+    op_map_init();
 
     for(int i=0;i<1;i++){
         for(int t=0;t<TEST_NUM;t++){        \
@@ -202,6 +205,7 @@ int main(){
             for(phase = 1; phase < 9 ; phase++){
                 if(!first_time[phase]){
                     printf("\rsolve phase : %d    ",phase);
+                    printf("min steps: %d\n", pop[0].op_cnt);
 
                 }
                     adjust_parameter(phase);         
@@ -223,8 +227,14 @@ int main(){
                         offspring.emplace_back(x);
                     }        
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
-                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {return a.value > b.value;});
+                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {
+                        if(a.value == b.value)  return a.op_cnt < b.op_cnt;
+                        return a.value > b.value;
+                    });
+                    // printf("%d ", pop[0].op_cnt);
+                    
                     pop.resize(population_size);
+                    
                 }
                 auto restore = pop;
                 for(auto &x:pop)
