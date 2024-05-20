@@ -1,6 +1,7 @@
 #pragma once
 #include<stdio.h>
 #include<vector>
+#include<stack>
 #include<algorithm>
 #include<string.h>
 #include<string>
@@ -15,6 +16,11 @@ int indices[12][4][4]={{{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}},{{1,5,9,
 {2,6,10,14},{2,6,10,14},{2,6,10,14}},{{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}},{{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}},{{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}},
 {{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}},{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},{{4,5,6,7},{4,5,6,7},{4,5,6,7},{4,5,6,7}},{{12,13,14,15},{12,13,14,15},{12,13,14,15},{12,13,14,15}},
 {{8,9,10,11},{8,9,10,11},{8,9,10,11},{8,9,10,11}}};
+
+typedef enum wcaoper{
+    L, R, F, B, U, D,
+    Lw, Rw, Fw, Bw, Uw, Dw
+}WCAOPER;
 
 vector<int> tmp;
 
@@ -46,6 +52,10 @@ struct Rubik{
     int state[6][16]={0};
     int phase;
     int value;
+
+    stack<pair<char, int>> raw_op;
+    vector<int> wca_op;
+
     Rubik(){//target state
         phase=1;
         value=0;
@@ -245,7 +255,12 @@ struct Rubik{
             for(int j=0;j<4;j++)
                 swap(state[path[5][i]][indices[11][i][j]],state[path[5][i-1]][indices[11][i-1][j]]);
     }
+
+    void push_op(const char c){
+        // todo
+    }
     void operation(const char *str){
+        push_op(str[0]);
         switch (str[0]){
             case 'L':
                 L();
@@ -727,7 +742,16 @@ struct Rubik{
             assert(0);
         }
     }
+    void print_operations(){
+        puts("Total operations : ");
+        printf("%d\n", wca_op.size());
+        for(auto op: wca_op){
+            printf("%d", op);
+        }
+    }
 };
+
+
 void interative_mode(Rubik &obj){
     puts("---interative_mode---");
     char str[1005];
