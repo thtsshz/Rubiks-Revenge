@@ -17,6 +17,7 @@ int indices[12][4][4]={{{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}},{{1,5,9,
 {2,6,10,14},{2,6,10,14},{2,6,10,14}},{{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}},{{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}},{{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}},
 {{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}},{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},{{4,5,6,7},{4,5,6,7},{4,5,6,7},{4,5,6,7}},{{12,13,14,15},{12,13,14,15},{12,13,14,15},{12,13,14,15}},
 {{8,9,10,11},{8,9,10,11},{8,9,10,11},{8,9,10,11}}};
+int max_fitness[10]={0,8,24,16,26,31,28,14,6,0};
 
 unordered_map<char, string> op_map;
 unordered_map<int, char> number_map;
@@ -103,7 +104,16 @@ struct Rubik{
             }
             operation(tmp);
         }
+        st_ptr=-1; // reset the value
+        wca_ptr=0;
+        op_cnt = 0;
+
     }
+    bool operator<(const Rubik& other) const { // the smallest the best
+        if(value == max_fitness[phase] && other.value == value)  return op_cnt < other.op_cnt;
+        return value > other.value; // Compare directly to find the maximum
+    }
+
     inline char hash(int v){
         return hash_map[v];
     }
