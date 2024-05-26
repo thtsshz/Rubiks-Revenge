@@ -16,6 +16,7 @@ int indices[12][4][4]={{{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}},{{1,5,9,
 {2,6,10,14},{2,6,10,14},{2,6,10,14}},{{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}},{{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}},{{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}},
 {{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}},{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},{{4,5,6,7},{4,5,6,7},{4,5,6,7},{4,5,6,7}},{{12,13,14,15},{12,13,14,15},{12,13,14,15},{12,13,14,15}},
 {{8,9,10,11},{8,9,10,11},{8,9,10,11},{8,9,10,11}}};
+int max_fitness[10]={0,8,24,16,26,31,28,14,6,0};
 
 unordered_map<char, string> op_map;
 unordered_map<int, char> number_map;
@@ -57,14 +58,20 @@ struct Rubik{
     int phase;
     int value;
 
-    vector<pair<char, int>> st;
-    int op_cnt;
-    int st_ptr; // index of the last element in the stack
-    int wca_ptr;
-    vector<string> wca_op;
+    // vector<pair<char, int>> st;
+    pair<char, int> st[5];
+    int st_ptr=-1; // index of the last element in the stack
+    int wca_ptr=0;
+    int op_cnt = 0;
+    // vector<string> wca_op;
     Rubik(){//target state
         phase=1;
         value=0;
+        st_ptr=-1; // index of the last element in the stack
+        wca_ptr=0;
+        op_cnt = 0;
+        // st.clear();
+        // wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -72,6 +79,11 @@ struct Rubik{
     Rubik(char *op){
         phase=1;
         value=0;
+        st_ptr=-1; // index of the last element in the stack
+        wca_ptr=0;
+        op_cnt = 0;
+        // st.clear();
+        // wca_op.clear();
         for(int i=0;i<6;i++)
             for(int j=0;j<16;j++)
                 state[i][j]=i;
@@ -91,7 +103,16 @@ struct Rubik{
             }
             operation(tmp);
         }
+        st_ptr=-1; // reset the value
+        wca_ptr=0;
+        op_cnt = 0;
+
     }
+    bool operator<(const Rubik& other) const { // the smallest the best
+        if(value == max_fitness[phase] && other.value == value)  return op_cnt < other.op_cnt;
+        return value > other.value; // Compare directly to find the maximum
+    }
+
     inline char hash(int v){
         return hash_map[v];
     }
@@ -264,39 +285,40 @@ struct Rubik{
 
     
 void twopairtowca(pair<char,int> fp, pair<char,int> sp){
-    
-    if(fp.second && sp.second){
-        string temp = "";
-        temp.push_back(toupper(fp.first));
-        temp.push_back('w');
-        temp.push_back(number_map[min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+       if(fp.second && sp.second){
+        // string temp = "";
+        // temp.push_back(toupper(fp.first));
+        // temp.push_back('w');
+        // temp.push_back(number_map[min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt++;
     }
     if(fp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt++;
     }
     else if(sp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back('w');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
-        temp.push_back(fp.first);
-        temp.push_back('\'');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('w');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        // temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('\'');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        op_cnt += 2;
     }
 }
 
 
 void st_to_wca() {
-    puts("st_to_wca");
-    cout << wca_ptr<<' '<<st_ptr << endl;
     bool visited[4] = {0};
-    sort(st.begin() + wca_ptr, st.begin() + st_ptr);
+    sort(st + wca_ptr, st + st_ptr,[](const pair<char, int>& a, const pair<char, int>& b){return a.first < b.first;});
     pair<char, int> fp={'\0', 0};
     pair<char, int> sp={'\0', 0};
 
@@ -304,14 +326,12 @@ void st_to_wca() {
         if(visited[k-wca_ptr]) continue;
         visited[k-wca_ptr] = true;
         fp=st[k];
-        // cout << "fp: " << fp.first << endl;
         
         for(int i=k+1; i<st_ptr; i++){
             if(visited[i-k]) continue;
-            visited[i-k] = true;
             if(toupper(fp.first) == toupper(st[i].first)){
+                visited[i-k] = true;
                 sp = st[i];
-                // cout << "sp: " << sp.first << endl;
                 break;
             }
         }
@@ -319,20 +339,24 @@ void st_to_wca() {
         pair<char, int> fp={'\0', 0};
         pair<char, int> sp={'\0', 0};
     }
-    wca_ptr = st_ptr;
+    // wca_ptr = st_ptr;
+    wca_ptr = 0;
+    st_ptr = 0;
 
     return;
 }
-
 void push_op(const char c){
     // LR UD FB
-    puts("push_op");
+    // puts("push_op");
     int i=0;
     for(i=st_ptr; i>=0; i--){
         if(st[i].first == c){
             st[i].second++;
             if(st[i].second == 4){
-                st.erase(st.begin()+i);
+                // st.erase(st.begin()+i);
+                for(int j=i+1; j<=st_ptr; j++){
+                    st[j-1]= st[j];
+                }
                 st_ptr--;
             }
             break;
@@ -341,20 +365,21 @@ void push_op(const char c){
             st_ptr++;
             if(i==st_ptr-1)
                 st_to_wca();
-            st.push_back(make_pair(c, 1));
+            st[st_ptr] = (make_pair(c, 1));
             break;
         }        
     }
     if(i==-1){
         // st_to_wca();
         st_ptr++;
-        st.push_back(make_pair(c, 1));
+        st[st_ptr] = (make_pair(c, 1));
+
     }
 }
 
 
     void operation(const char *str){
-        puts("operation");
+        // puts("operation");
         push_op(str[0]);
         switch (str[0]){
             case 'L':
@@ -840,7 +865,6 @@ void push_op(const char c){
 };
 
 void op_map_init(){
-    puts("opinit");
     op_map['L'] = "LlRr";
     op_map['l'] = "LlRr";
     op_map['R'] = "LlRr";
@@ -857,8 +881,6 @@ void op_map_init(){
     number_map[1] = '\0';
     number_map[2] =  '2';
     number_map[3] = '\'';
-    puts("opinitfin");
-
 }
 void interative_mode(Rubik &obj){
     puts("---interative_mode---");

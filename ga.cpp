@@ -29,6 +29,7 @@ int population_size = 2500;
 int generation = 350;
 int random_len[10]={10, 10, 10, 15, 10, 13, 20, 17};
 int fail_phase[10]={0};
+bool first[10]={0};
 vector<Rubik> pop;
 Rubik scramble(Rubik r,int len){
     while(len--){
@@ -85,8 +86,11 @@ Rubik tournament_selection(int sz){
         temp.push_back(pop[dis(gen)]);
 
     return *max_element(temp.begin(), temp.end(), [](const Rubik& a, const Rubik& b) {
-        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
-        return a.value > b.value; // Compare directly to find the maximum
+        if(a.value == max_fitness[a.phase] && b.value == a.value){
+            return a.op_cnt > b.op_cnt;
+            
+        }  
+        return a.value > b.value; // Compare directly to find the minimum
     });
 }
 void f(Rubik &r,const char *str){
@@ -149,6 +153,7 @@ void mutation(Rubik &r){
 
     }
     r=scramble(r,len);
+    // printf("%zu ", r.wca_op.size());
 }
 void expansion(){//expand the size of pop to population_size
     while((int)pop.size() < population_size){    
@@ -180,9 +185,10 @@ int main(){
         return 1;
     }
     double totalDuration = 0.0;
+    op_map_init();
 
     for(int i=0;i<1;i++){
-        for(int t=0;t<TEST_NUM;t++){        \
+        for(int t=0;t<TEST_NUM;t++){        
             auto start = std::chrono::high_resolution_clock::now();
 
             fgets(operation, MAX_SEQUENCE_LENGTH, file);
@@ -203,12 +209,10 @@ int main(){
             for(phase = 1; phase < 9 ; phase++){
                 if(!first_time[phase]){
                     printf("\rsolve phase : %d    ",phase);
-
                 }
                     adjust_parameter(phase);         
                 first_time[phase]++;
                 if(first_time[phase]>2){//redo
-                    initialize(r);
                     puts("\nredo");
                     goto redo;
                 }
@@ -224,11 +228,20 @@ int main(){
                         offspring.emplace_back(x);
                     }        
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
-                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {
-                        if(a.value == b.value)  return a.wca_op.size() < b.wca_op.size();
-                        return a.value > b.value;
-                    });
+                    sort(pop.begin(), pop.end());
+                    // for(auto x:pop)
+                    //     printf("%d\n",x.value);
+                    // ,[](const Rubik& a, const Rubik& b) {
+                    //     if(a.value == b.value)  return a.op_cnt < b.op_cnt;
+                    //     return a.value > b.value;
+                    // });
+                    // printf("%d ", pop[0].op_cnt);
+                    if(j%50==0&&phase==8){
+                        printf("%d\n",pop[0].value);
+                        pop[0].print();
+                    }
                     pop.resize(population_size);
+                    
                 }
                 auto restore = pop;
                 for(auto &x:pop)
@@ -277,7 +290,8 @@ int main(){
                 //     pop[0].print();
                 //     printf("end phase : %d\n",phase);
                 // }
-                
+                printf("min steps: %d %d %d\n", pop[0].op_cnt,pop[0].value,pop[1].value);
+
                 //reset the fitness value
                 if(phase<8){
                     for(auto &x:pop)
