@@ -186,6 +186,7 @@ int main(){
     }
     double totalDuration = 0.0;
     op_map_init();
+    op_map_init();
 
     for(int i=0;i<1;i++){
         for(int t=0;t<TEST_NUM;t++){        
@@ -241,6 +242,7 @@ int main(){
                         pop[0].print();
                     }
                     pop.resize(population_size);
+                    
                     
                 }
                 auto restore = pop;
