@@ -22,8 +22,8 @@ vector<string> G4 = {"R", "L", "F", "B", "U", "D"};
 vector<string> G5 = {"R2", "L2", "F", "B", "U", "D"};
 vector<string> G6 = {"R2", "L2", "F2", "B2", "U", "D"};
 vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
-const bool DISPLAY=true;
-const int TEST_NUM=1;
+const bool DISPLAY=false;
+const int TEST_NUM=100;
 const int MAX_SEQUENCE_LENGTH=200;
 int population_size = 2500;
 int generation = 350;
@@ -281,7 +281,7 @@ int main(){
                     printf("remain: %d\n",(int)pop.size());        
                     printf("fitness: %d\n",(int)pop[0].value);        
                     pop[0].print();
-                    pop[0].print_operations();
+                    // pop[0].print_operations();
                     printf("end phase : %d\n",phase);
                 }
                 
