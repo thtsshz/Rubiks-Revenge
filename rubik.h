@@ -1,6 +1,7 @@
 #pragma once
 #include<stdio.h>
 #include<vector>
+#include<stack>
 #include<algorithm>
 #include<string.h>
 #include<string>
