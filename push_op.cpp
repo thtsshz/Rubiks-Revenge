@@ -23,31 +23,31 @@ int op_cnt = 0;
 
 void twopairtowca(pair<char,int> fp, pair<char,int> sp){
     if(fp.second && sp.second){
-        string temp = "";
-        temp.push_back(toupper(fp.first));
-        temp.push_back('w');
-        temp.push_back(number_map[min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(toupper(fp.first));
+        // temp.push_back('w');
+        // temp.push_back(number_map[min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
         op_cnt++;
     }
     if(fp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
         op_cnt++;
     }
     else if(sp.second - min(fp.second, sp.second)){
-        string temp = "";
-        temp.push_back(fp.first);
-        temp.push_back('w');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
-        temp = "";
-        temp.push_back(fp.first);
-        temp.push_back('\'');
-        temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-        wca_op.push_back(temp);
+        // string temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('w');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
+        // temp = "";
+        // temp.push_back(fp.first);
+        // temp.push_back('\'');
+        // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
+        // wca_op.push_back(temp);
         op_cnt+=2;
     }
 }
