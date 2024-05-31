@@ -29,6 +29,7 @@ int population_size = 2500;
 int generation = 350;
 int random_len[10]={10, 10, 10, 15, 10, 13, 20, 17};
 int fail_phase[10]={0};
+bool first[10]={0};
 vector<Rubik> pop;
 Rubik scramble(Rubik r,int len){
     while(len--){
@@ -84,10 +85,14 @@ Rubik tournament_selection(int sz){
     while(sz--)
         temp.push_back(pop[dis(gen)]);
 
-    return *max_element(temp.begin(), temp.end(), [](const Rubik& a, const Rubik& b) {
-        if(a.value == b.value)  return a.op_cnt < b.op_cnt;
-        return a.value > b.value; // Compare directly to find the maximum
-    });
+    return *max_element(temp.begin(), temp.end());
+    // , [](const Rubik& a, const Rubik& b) {
+    //     if(a.value == max_fitness[a.phase] && b.value == a.value){
+    //         return a.op_cnt > b.op_cnt;
+            
+    //     }  
+    //     return a.value > b.value; // Compare directly to find the minimum
+    // });
 }
 void f(Rubik &r,const char *str){
     for(int i=0; str[i];i++){
@@ -100,7 +105,7 @@ void mutation(Rubik &r){
     uniform_int_distribution<int> dis(1, random_len[r.phase-1]);
     int len=dis(gen);//generate the length of operation
 
-    if(r.phase==4&&r.value==16){
+    if(r.phase==4&&r.value>=14){
         Rubik temp=r,temp2=r;
         // U -> B
         // F -> U
@@ -117,6 +122,12 @@ void mutation(Rubik &r){
         // r2 B2 U2 l U2 r' U2 r U2 F2 r F2 l' B2 r2
         f(temp,"rrBBUUlUUrrrUUrUUFFrFFlllBBrr");
         pop.push_back(temp);
+    }
+    if(r.phase==6&&r.value==35){
+        Rubik temp=r;
+        f(temp,"ULULULUUULLLUUULLL");
+        pop.push_back(temp);
+
     }
     if(r.phase==7&&(r.value==10000||r.value==10002)){
         Rubik temp=r;
@@ -161,14 +172,19 @@ void expansion(){//expand the size of pop to population_size
 }
 void adjust_parameter(int phase){
     //
-    if(phase<4){
-        population_size = 2500;
+    if(phase<3){
+        population_size = 2000;
         generation = 100;
         
     }
+    // else if(phase==6||phase==5){
+    //     population_size = 8000;
+    //     generation = 200;
+
+    // }
     else{
         population_size = 5000;
-        generation = 200;
+        generation = 100;
     }
 }
 int main(){
@@ -181,10 +197,11 @@ int main(){
         return 1;
     }
     double totalDuration = 0.0;
+    int total_step=0;
     op_map_init();
 
     for(int i=0;i<1;i++){
-        for(int t=0;t<TEST_NUM;t++){        \
+        for(int t=0;t<TEST_NUM;t++){        
             auto start = std::chrono::high_resolution_clock::now();
 
             fgets(operation, MAX_SEQUENCE_LENGTH, file);
@@ -205,13 +222,10 @@ int main(){
             for(phase = 1; phase < 9 ; phase++){
                 if(!first_time[phase]){
                     printf("\rsolve phase : %d    ",phase);
-                    printf("min steps: %d\n", pop[0].op_cnt);
-
                 }
                     adjust_parameter(phase);         
                 first_time[phase]++;
                 if(first_time[phase]>2){//redo
-                    initialize(r);
                     puts("\nredo");
                     goto redo;
                 }
@@ -227,13 +241,39 @@ int main(){
                         offspring.emplace_back(x);
                     }        
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
-                    sort(pop.begin(), pop.end(),[](const Rubik& a, const Rubik& b) {
-                        if(a.value == b.value)  return a.op_cnt < b.op_cnt;
-                        return a.value > b.value;
-                    });
+                    sort(pop.begin(), pop.end());
+                    // for(auto x:pop)
+                    //     printf("%d\n",x.value);
+                    // ,[](const Rubik& a, const Rubik& b) {
+                    //     if(a.value == b.value)  return a.op_cnt < b.op_cnt;
+                    //     return a.value > b.value;
+                    // });
                     // printf("%d ", pop[0].op_cnt);
-                    
+        //             if(j%50==0&&phase==6){
+        //                 printf("%d\n",pop[0].value);
+        //                 pop[0].print();
+        //                 if(pop[0].value==35){
+        //                 puts("test begins");
+        //                         Rubik temp=pop[0];
+        //                  // DDD RRR D R D F DDD FFF
+        // f(temp,"UUULLLULUFUUUFFF");
+        //                 temp.print();
+        //                 puts("test ends"); 
+        //                  printf("%d\n",pop[1].value);
+                               
+        //                 pop[1].print();
+
+        //                 puts("test begins");
+
+        //                         temp=pop[1];
+        //                  // DDD RRR D R D F DDD FFF
+        // f(temp,"UUULLLULUFUUUFFF");
+        //                 temp.print();
+        //                 puts("test ends");
+        //                 }
+                    // }
                     pop.resize(population_size);
+                    
                     
                 }
                 auto restore = pop;
@@ -283,11 +323,22 @@ int main(){
                 //     pop[0].print();
                 //     printf("end phase : %d\n",phase);
                 // }
-                
+
                 //reset the fitness value
+                int min_step = 1000;
+                for(auto x:pop)
+                    min_step = min(min_step,x.op_cnt);
+                printf("min steps: %d\n", min_step);
+
                 if(phase<8){
                     for(auto &x:pop)
                         x.fitness();
+                    for(auto &x:pop)
+                        x.pre_op_cnt=x.op_cnt;
+                }
+                else{
+                    total_step+=min_step;
+
                 }
                 
             }
@@ -313,6 +364,7 @@ int main(){
         squaredDifferencesSum += (duration - averageDuration) * (duration - averageDuration);
     }
     printf("Standard deviation: %f seconds\n", sqrt(squaredDifferencesSum / TEST_NUM));
+    printf("Average steps : %d\n", total_step);
 
     // for(int i=1;i<10;i++){
     //     printf("%d : %d\n",i,fail_phase[i]);

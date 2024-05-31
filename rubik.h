@@ -1,6 +1,7 @@
 #pragma once
 #include<stdio.h>
 #include<vector>
+#include<stack>
 #include<algorithm>
 #include<string.h>
 #include<string>
@@ -16,7 +17,9 @@ int indices[12][4][4]={{{0,4,8,12},{3,2,1,0},{15,11,7,3},{12,13,14,15}},{{1,5,9,
 {2,6,10,14},{2,6,10,14},{2,6,10,14}},{{0,4,8,12},{0,4,8,12},{15,11,7,3},{0,4,8,12}},{{1,5,9,13},{1,5,9,13},{14,10,6,2},{1,5,9,13}},{{0,4,8,12},{12,13,14,15},{15,11,7,3},{3,2,1,0}},
 {{1,5,9,13},{8,9,10,11},{14,10,6,2},{7,6,5,4}},{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},{{4,5,6,7},{4,5,6,7},{4,5,6,7},{4,5,6,7}},{{12,13,14,15},{12,13,14,15},{12,13,14,15},{12,13,14,15}},
 {{8,9,10,11},{8,9,10,11},{8,9,10,11},{8,9,10,11}}};
-
+int max_fitness[10]={0,8,24,16,26,31,28,14,6,0};
+int weight_l[10] = {0,4,4,6,14,4,10,4,7,0};
+int weight_r[10] = {0,1,1,1,1,1,1,1,1,0};
 unordered_map<char, string> op_map;
 unordered_map<int, char> number_map;
 
@@ -61,6 +64,7 @@ struct Rubik{
     pair<char, int> st[5];
     int st_ptr=-1; // index of the last element in the stack
     int wca_ptr=0;
+    int pre_op_cnt=0;
     int op_cnt = 0;
     // vector<string> wca_op;
     Rubik(){//target state
@@ -68,7 +72,7 @@ struct Rubik{
         value=0;
         st_ptr=-1; // index of the last element in the stack
         wca_ptr=0;
-        op_cnt = 0;
+        op_cnt = pre_op_cnt = 0;
         // st.clear();
         // wca_op.clear();
         for(int i=0;i<6;i++)
@@ -80,7 +84,7 @@ struct Rubik{
         value=0;
         st_ptr=-1; // index of the last element in the stack
         wca_ptr=0;
-        op_cnt = 0;
+        op_cnt = pre_op_cnt = 0;
         // st.clear();
         // wca_op.clear();
         for(int i=0;i<6;i++)
@@ -102,7 +106,18 @@ struct Rubik{
             }
             operation(tmp);
         }
+        st_ptr=-1; // reset the value
+        wca_ptr=0;
+        op_cnt = pre_op_cnt = 0;
+
     }
+    bool operator<(const Rubik& other) const { // the smallest the best
+        // if(value == max_fitness[phase] && other.value == value)  return op_cnt < other.op_cnt;
+        int first = weight_l[phase]*value - weight_r[phase]*(op_cnt-pre_op_cnt);
+        int second = weight_l[phase]* other.value - weight_r[phase]*(other.op_cnt-other.pre_op_cnt);
+        return first>second; // Compare directly to find the maximum
+    }
+
     inline char hash(int v){
         return hash_map[v];
     }
@@ -722,7 +737,7 @@ void push_op(const char c){
             value += state[1][13]==state[1][14]&&state[5][1]==state[5][2];//
             value += state[2][13]==state[2][14]&&state[5][7]==state[5][11];
             value += state[3][13]==state[3][14]&&state[5][13]==state[5][14];
-            // value = (value-tmp)*3 +tmp;
+            // value = (value-tmp)*2 +tmp;
             //
             tmp=value;
             value += 10*(tmp==16&&(state[0][1]==state[0][2])&& state[4][4]==state[4][8]&&(state[2][1]==state[2][2])&& state[4][7]==state[4][11]);
@@ -789,15 +804,21 @@ void push_op(const char c){
             //corner
             for(auto x:{0, 3, 12, 15}){
                 for(auto y:{4, 5}){
-                    value+=(state[y][x]==4)||(state[y][x]==5);
+                    value+=2*((state[y][x]==4)||(state[y][x]==5));
                 }
             }
             //edge
             for(auto x:{1, 4, 7, 13}){
                 for(auto y:{4,5}){
+                    if(y==4&&x==13)
+                        continue;
                     value+=(state[y][x]==4)||(state[y][x]==5);
                 }
             }
+            // if(value==36)
+            //     value+=10;
+            if(value==35&&((state[4][13]==4)||(state[4][13]==5)))
+                value=45;
             // value+=(state[4][13]!=0&&state[4][13]!=2)&&(state[1][1]!=0&&state[1][1]!=2);
             // value+=(state[4][1]!=0&&state[4][1]!=2)&&(state[3][1]!=0&&state[3][1]!=2);
 
