@@ -23,7 +23,7 @@ vector<string> G5 = {"R2", "L2", "F", "B", "U", "D"};
 vector<string> G6 = {"R2", "L2", "F2", "B2", "U", "D"};
 vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 const bool DISPLAY=false;
-const int TEST_NUM=100;
+const int TEST_NUM=250;
 const int MAX_SEQUENCE_LENGTH=200;
 int population_size = 2500;
 int generation = 350;
@@ -190,6 +190,7 @@ void adjust_parameter(int phase){
 int main(){
     char operation[MAX_SEQUENCE_LENGTH];
     vector<double> durations;
+    vector<vector<int>> step_each_phases(TEST_NUM, vector<int>(9, 0)); 
 
     FILE *file = fopen("testcase/testcases_op.txt", "r");
     if (file == NULL) {
@@ -198,6 +199,8 @@ int main(){
     }
     double totalDuration = 0.0;
     int total_step=0;
+    int total_step_each_phase[9]={0};
+    int prev_min_step=0;
     op_map_init();
 
     for(int i=0;i<1;i++){
@@ -218,6 +221,7 @@ int main(){
 
             // Rubik r("UUULDFFFLLFFFRBBBLLLRRDLLUBBUDDDLLDDDLLLUuUuFuUuFDFFUUFfFfFFRrUFfFfFFDDDBUuFfFfFfLLLRRDDFfFF");
             initialize(r);
+            prev_min_step=0;
             int phase;
             for(phase = 1; phase < 9 ; phase++){
                 if(!first_time[phase]){
@@ -329,7 +333,10 @@ int main(){
                 for(auto x:pop)
                     min_step = min(min_step,x.op_cnt);
                 printf("min steps: %d\n", min_step);
-
+                total_step_each_phase[phase]+=(min_step-prev_min_step);
+                step_each_phases[t][phase]=min_step-prev_min_step;
+                prev_min_step = min_step;
+                
                 if(phase<8){
                     for(auto &x:pop)
                         x.fitness();
@@ -338,7 +345,6 @@ int main(){
                 }
                 else{
                     total_step+=min_step;
-
                 }
                 
             }
@@ -364,7 +370,21 @@ int main(){
         squaredDifferencesSum += (duration - averageDuration) * (duration - averageDuration);
     }
     printf("Standard deviation: %f seconds\n", sqrt(squaredDifferencesSum / TEST_NUM));
-    printf("Average steps : %d\n", total_step);
+    printf("Average steps : %d\n", total_step/TEST_NUM);
+    // calculate standard deviation of steps each phases 
+    for(int phase_num=1; phase_num<=8; phase_num++){
+        double average = total_step_each_phase[phase_num]/(double)TEST_NUM;
+        double squaredDifferencesSum = 0;
+        for (int i=0;i<TEST_NUM;i++) {
+            squaredDifferencesSum += (step_each_phases[i][phase_num] - average) * (step_each_phases[i][phase_num] - average);
+        }
+        printf("Standard deviation of step of phase %d: %f\n", phase_num, sqrt(squaredDifferencesSum / TEST_NUM));
+        printf("Average step of phase %d: %d\n", phase_num, total_step_each_phase[phase_num]/TEST_NUM);
+
+    }
+    // printf("fail phase : %d\n", fail_phase
+
+        
 
     // for(int i=1;i<10;i++){
     //     printf("%d : %d\n",i,fail_phase[i]);
