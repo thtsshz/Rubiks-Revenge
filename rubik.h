@@ -37,15 +37,8 @@ int max_fitness[10] = {0, 8, 24, 16, 26, 31, 28, 14, 6, 0};
 int weight_l[10] = {0, 4, 4, 6, 14, 4, 10, 4, 7, 0};
 int weight_r[10] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 unordered_map<char, string> op_map;
-unordered_map<int, char> number_map;
 
 vector<int> tmp;
-// maintain a vector<pair<char, int>> (oper, times) seen as stack
-// parallel motion(independent)
-// operations could be checked in operation()
-// WCA:
-// https://www.worldcubeassociation.org/regulations/translations/chinese-traditional/#article-12-notation
-
 struct Rubik {
     /* target state:
         G is the abbreviation for GREEN, which is our front face.
@@ -71,21 +64,17 @@ struct Rubik {
     int phase;
     int value;
 
-    // vector<pair<char, int>> st;
     pair<char, int> st[5];
     int st_ptr = -1;  // index of the last element in the stack
     int wca_ptr = 0;
     int pre_op_cnt = 0;
     int op_cnt = 0;
-    // vector<string> wca_op;
     Rubik() {  // initialize with target state
         phase = 1;
         value = 0;
         st_ptr = -1;  // index of the last element in the stack
         wca_ptr = 0;
         op_cnt = pre_op_cnt = 0;
-        // st.clear();
-        // wca_op.clear();
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 16; j++) state[i][j] = i;
     }
@@ -95,8 +84,6 @@ struct Rubik {
         st_ptr = -1;  // index of the last element in the stack
         wca_ptr = 0;
         op_cnt = pre_op_cnt = 0;
-        // st.clear();
-        // wca_op.clear();
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 16; j++) state[i][j] = i;
 
@@ -279,68 +266,73 @@ struct Rubik {
                      state[path[5][i - 1]][indices[11][i - 1][j]]);
     }
 
+    /* Translate the inner, outer move in the same face to the move count in OBTM.
+    i.e. (L,3), (l,2) -> [Lw2, L] -> 2 steps
+    (R,1), (r,3) -> [Rw, R] -> 2 steps
+    (U,0), (u,1) -> [Uw1, U'] -> 2 steps 
+    */
     void twopairtowca(pair<char, int> fp, pair<char, int> sp) {
+        // if there are both outer and inner layer operation, add one move.
         if (fp.second && sp.second) {
-            // string temp = "";
-            // temp.push_back(toupper(fp.first));
-            // temp.push_back('w');
-            // temp.push_back(number_map[min(fp.second, sp.second)]);
-            // wca_op.push_back(temp);
             op_cnt++;
         }
+        // if there is more outer layer operation, add another move.
         if (fp.second - min(fp.second, sp.second)) {
-            // string temp = "";
-            // temp.push_back(fp.first);
-            // temp.push_back(number_map[fp.second-min(fp.second, sp.second)]);
-            // wca_op.push_back(temp);
             op_cnt++;
-        } else if (sp.second - min(fp.second, sp.second)) {
-            // string temp = "";
-            // temp.push_back(fp.first);
-            // temp.push_back('w');
-            // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-            // wca_op.push_back(temp);
-            // temp = "";
-            // temp.push_back(fp.first);
-            // temp.push_back('\'');
-            // temp.push_back(number_map[sp.second-min(fp.second, sp.second)]);
-            // wca_op.push_back(temp);
-            op_cnt += 2;
+        } 
+        // if there is more inner layer operation, add another move.
+        else if (sp.second - min(fp.second, sp.second)) {
+            op_cnt++;
         }
     }
-
+    /* Transform the stack and pair the inner and outer face turn to call */
     void st_to_wca() {
+    
         bool visited[4] = {0};
+        // Ensure that the uppercase (outer) should appear first.
         sort(st + wca_ptr, st + st_ptr,
              [](const pair<char, int> &a, const pair<char, int> &b) {
                  return a.first < b.first;
              });
-        pair<char, int> fp = {'\0', 0};
-        pair<char, int> sp = {'\0', 0};
+        pair<char, int> fp = {'\0', 0}; // outer face turn: (move, count)
+        pair<char, int> sp = {'\0', 0}; // inner face turn: (move, count)
 
         for (int k = wca_ptr; k < st_ptr; k++) {
             if (visited[k - wca_ptr]) continue;
             visited[k - wca_ptr] = true;
+            // record outer face turn
             fp = st[k];
 
             for (int i = k + 1; i < st_ptr; i++) {
                 if (visited[i - k]) continue;
+                // match inner face turn if existed
                 if (toupper(fp.first) == toupper(st[i].first)) {
                     visited[i - k] = true;
                     sp = st[i];
                     break;
                 }
             }
+            // pass outer and inner face turn to twopairtowca() to get the move count.
             twopairtowca(fp, sp);
-            pair<char, int> fp = {'\0', 0};
-            pair<char, int> sp = {'\0', 0};
+            fp = {'\0', 0};
+            sp = {'\0', 0};
         }
-        // wca_ptr = st_ptr;
         wca_ptr = 0;
         st_ptr = 0;
 
         return;
     }
+
+    /*
+    * push_op(): Push the operation into current stack.
+
+    * The stack should only contain the operation in same face and the oppisite face, which is mapped by op_map.
+    * If the new operation is not in corresponding face
+    * , which means it and the subsequent operations are independent to all the operations in the stack
+    * , call st_to_wca() to clear the stack, push the new operation in it.
+    * 
+    * If a same operation does four times (a 360 degree rotation), pop it.
+    */
     void push_op(const char c) {
         // LR UD FB
         // puts("push_op");
@@ -348,29 +340,30 @@ struct Rubik {
         for (i = st_ptr; i >= 0; i--) {
             if (st[i].first == c) {
                 st[i].second++;
+                // Check if the operation is a 360 degree rotation.
                 if (st[i].second == 4) {
-                    // st.erase(st.begin()+i);
                     for (int j = i + 1; j <= st_ptr; j++) {
                         st[j - 1] = st[j];
                     }
                     st_ptr--;
                 }
                 break;
-            } else if (op_map[c].find(st[i].first) == string::npos) {
+            } // If the pushed operation is not the in-stack operation's face or its opposite face, clear the stack.
+            else if (op_map[c].find(st[i].first) == string::npos) {
                 st_ptr++;
                 if (i == st_ptr - 1) st_to_wca();
                 st[st_ptr] = (make_pair(c, 1));
                 break;
             }
         }
+        // If current operation is not in stack, push it.
         if (i == -1) {
-            // st_to_wca();
             st_ptr++;
             st[st_ptr] = (make_pair(c, 1));
         }
     }
 
-    // perforn the corresponding operation to current individual
+    // Perform the corresponding operation to current individual
     void operation(const char *str) {
         push_op(str[0]);
         switch (str[0]) {
@@ -900,6 +893,7 @@ struct Rubik {
     }
 };
 
+// Define the map between the operation and its current face or opposite face turn
 void op_map_init() {
     op_map['L'] = "LlRr";
     op_map['l'] = "LlRr";
@@ -913,10 +907,6 @@ void op_map_init() {
     op_map['u'] = "UuDd";
     op_map['D'] = "UuDd";
     op_map['d'] = "UuDd";
-
-    number_map[1] = '\0';
-    number_map[2] = '2';
-    number_map[3] = '\'';
 }
 void interative_mode(Rubik &obj) {
     puts("---interative_mode---");

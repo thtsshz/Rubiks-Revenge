@@ -33,7 +33,8 @@ vector<string> G7 = {"R2", "L2", "F2", "B2", "U2", "D2"};
 // Turn on the DISPLAY flag to see the transformation of the Rubik's Cube at
 // each stage.
 const bool DISPLAY = false;
-const int TEST_NUM = 250;
+const int TEST_NUM = 100;
+const int RUN_NUM = 1;
 const int MAX_SEQUENCE_LENGTH = 200;
 int population_size = 2500;
 int generation = 350;
@@ -172,7 +173,7 @@ int main() {
     int prev_min_step = 0;
     op_map_init();
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < RUN_NUM; i++) {
         for (int t = 0; t < TEST_NUM; t++) {
             auto start = std::chrono::high_resolution_clock::now();
 
@@ -240,7 +241,6 @@ int main() {
                 int min_step = 1000;
                 for (auto x : pop) min_step = min(min_step, x.op_cnt);
                 printf("min steps: %d\n", min_step);
-                total_step_each_phase[phase] += (min_step - prev_min_step);
                 step_each_phases[t][phase] = min_step - prev_min_step;
                 prev_min_step = min_step;
 
@@ -275,7 +275,11 @@ int main() {
     printf("Average steps : %d\n", total_step / TEST_NUM);
     // calculate standard deviation of steps each phases
     for (int phase_num = 1; phase_num <= 8; phase_num++) {
-        double average = total_step_each_phase[phase_num] / (double)TEST_NUM;
+        double average = 0.0;
+        for(int i=0; i<TEST_NUM; i++){
+            average += step_each_phases[i][phase_num];
+        }
+        total_step_each_phase[phase_num] /= (double)TEST_NUM;
         double squaredDifferencesSum = 0;
         for (int i = 0; i < TEST_NUM; i++) {
             squaredDifferencesSum +=
@@ -284,7 +288,7 @@ int main() {
         }
         printf("Standard deviation of step of phase %d: %f\n", phase_num,
                sqrt(squaredDifferencesSum / TEST_NUM));
-        printf("Average step of phase %d: %d\n", phase_num,
-               total_step_each_phase[phase_num] / TEST_NUM);
+        printf("Average step of phase %d: %.2f\n", phase_num,
+               average);
     }
 }
