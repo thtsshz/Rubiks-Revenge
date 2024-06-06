@@ -1,6 +1,6 @@
 /*
     File Name : rubik.h
-    Description : This file contains all the operations of the cube and the
+    This file contains all the operations of the cube and the
    design of the fitness function.
 */
 #pragma once
@@ -8,7 +8,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <algorithm>
 #include <stack>
 #include <string>
@@ -157,7 +156,7 @@ struct Rubik {
     }
 
     void print() {
-        puts("************");
+        // puts("************");
         for (int i = 0; i < 4; i++) {
             printf("      ");
             for (int j = 0; j < 4; j++)
