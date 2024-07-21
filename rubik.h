@@ -69,6 +69,7 @@ struct Rubik {
     int wca_ptr = 0;
     int pre_op_cnt = 0;
     int op_cnt = 0;
+    vector<char> actions;
     Rubik() {  // initialize with target state
         phase = 1;
         value = 0;
@@ -336,6 +337,7 @@ struct Rubik {
     void push_op(const char c) {
         // LR UD FB
         // puts("push_op");
+        actions.push_back(c);
         int i = 0;
         for (i = st_ptr; i >= 0; i--) {
             if (st[i].first == c) {
