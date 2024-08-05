@@ -135,7 +135,20 @@ void mutation(Rubik &r) {
     }
     r = scramble(r, len);
 }
+void one_point_crossover(Rubik &p1, Rubik &p2){
+    string a = p1.current_state_actions;
+    string b = p2.current_state_actions;
+    int i;
+    uniform_int_distribution<int> dis(0, a.size() - 1);
+    int l = dis(gen);
+    uniform_int_distribution<int> dis2(0, b.size() - 1);
+    int r = dis2(gen);
+    string child1 = p1.prev_actions + a.substr(0, l + 1) + b.substr(r);
+    string child2 = p2.prev_actions + a.substr(l + 1) + b.substr(0, r);
+    pop.push_back(Rubik(child1.c_str()));
+    pop.push_back(Rubik(child2.c_str()));
 
+}
 // expand the size of pop to population_size
 void expansion() {
     while ((int)pop.size() < population_size) {
@@ -188,7 +201,17 @@ int main() {
                 puts("");
             }
             int first_time[10] = {0};
-            initialize(r);
+            initialize(r);        
+            for(auto x: pop){
+            //     printf("prev : %s\n", x.prev_actions.c_str());
+            //     printf("cur : %s\n", x.current_state_actions.c_str());        
+                string orig = operation;
+                x.prev_actions = orig + x.current_state_actions;
+                x.current_state_actions.clear();
+                
+                // printf("prev : %s\n", x.prev_actions.c_str());
+                // printf("cur : %s\n", x.current_state_actions.c_str());
+            }
             prev_min_step = 0;
             int phase;
             for (phase = 1; phase < 9; phase++) {
@@ -204,11 +227,16 @@ int main() {
                 expansion();
                 for (int j = 0; j < generation; j++) {
                     vector<Rubik> offspring;
-                    for (int k = 0; k < population_size * 10; k++) {
+                    for (int k = 0; k < population_size * 5; k++) {
                         Rubik x = tournament_selection(3);
                         assert(x.phase == phase);
                         mutation(x);
                         offspring.emplace_back(x);
+                        Rubik y = tournament_selection(3);
+                        assert(y.phase == phase);
+                        mutation(y);
+                        offspring.emplace_back(y);
+                        // one_point_crossover(x,y);
                     }
                     pop.insert(pop.end(), offspring.begin(), offspring.end());
                     sort(pop.begin(), pop.end());
@@ -246,7 +274,9 @@ int main() {
 
                 if (phase < 8) {
                     for (auto &x : pop) x.fitness();
-                    for (auto &x : pop) x.pre_op_cnt = x.op_cnt;
+                    for (auto &x : pop) x.pre_op_cnt = x.op_cnt;                    
+                    for (auto &x : pop) x.prev_actions += x.current_state_actions;
+                    for (auto &x : pop) x.current_state_actions.clear();
                 } else {
                     total_step += min_step;
                 }

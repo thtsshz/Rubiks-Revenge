@@ -69,7 +69,9 @@ struct Rubik {
     int wca_ptr = 0;
     int pre_op_cnt = 0;
     int op_cnt = 0;
-    vector<char> actions;
+    string actions;
+    string current_state_actions;
+    string prev_actions;
     Rubik() {  // initialize with target state
         phase = 1;
         value = 0;
@@ -78,8 +80,9 @@ struct Rubik {
         op_cnt = pre_op_cnt = 0;
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 16; j++) state[i][j] = i;
+        actions = current_state_actions = prev_actions = "";
     }
-    Rubik(char *op) {  // initialize with sequence of operations
+    Rubik(const char *op) {  // initialize with sequence of operations
         phase = 1;
         value = 0;
         st_ptr = -1;  // index of the last element in the stack
@@ -105,6 +108,8 @@ struct Rubik {
         st_ptr = -1;  // reset the value
         wca_ptr = 0;
         op_cnt = pre_op_cnt = 0;
+        actions = current_state_actions = prev_actions = "";
+
     }
     bool operator<(const Rubik &other) const {
         // weight_l[] : the weight of the fitness function in each phase
@@ -337,7 +342,8 @@ struct Rubik {
     void push_op(const char c) {
         // LR UD FB
         // puts("push_op");
-        actions.push_back(c);
+        actions+=c;
+        current_state_actions+=c;
         int i = 0;
         for (i = st_ptr; i >= 0; i--) {
             if (st[i].first == c) {
