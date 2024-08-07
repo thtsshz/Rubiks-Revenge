@@ -108,7 +108,8 @@ struct Rubik {
         st_ptr = -1;  // reset the value
         wca_ptr = 0;
         op_cnt = pre_op_cnt = 0;
-        actions = current_state_actions = prev_actions = "";
+        // actions = current_state_actions = prev_actions = "";
+        fitness();
 
     }
     bool operator<(const Rubik &other) const {
