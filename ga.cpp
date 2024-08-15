@@ -244,15 +244,17 @@ int main() {
                         
                         Rubik y = tournament_selection(3);
                         assert(y.phase == phase);
-                        vector<Rubik> cross = one_point_crossover(x,y);
-                        mutation(cross[0]);
-                        mutation(cross[1]);
-                        pop.emplace_back(cross[0]);
-                        pop.emplace_back(cross[1]);
+
                         mutation(x);
                         offspring.emplace_back(x);
                         mutation(y);
                         offspring.emplace_back(y);
+
+                        vector<Rubik> cross = one_point_crossover(x,y);
+                        // mutation(cross[0]);
+                        // mutation(cross[1]);
+                        offspring.emplace_back(cross[0]);
+                        offspring.emplace_back(cross[1]);
 
                        
                         
