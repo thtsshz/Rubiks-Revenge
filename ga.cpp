@@ -161,7 +161,6 @@ vector<Rubik> one_point_crossover(Rubik &p1, Rubik &p2){
         ret.emplace_back(p2);
         return ret;
     }
-    int i;
     uniform_int_distribution<int> dis(0, a.size() - 1);
     int l = dis(gen);
     uniform_int_distribution<int> dis2(0, b.size() - 1);
@@ -170,6 +169,10 @@ vector<Rubik> one_point_crossover(Rubik &p1, Rubik &p2){
     string child2 = p2.prev_actions + a.substr(l + 1) + b.substr(0, r);
     ret.push_back(Rubik(child1.c_str()));
     ret.push_back(Rubik(child2.c_str()));
+    ret[0].prev_actions = p1.prev_actions;
+    ret[0].current_state_actions = a.substr(0, l + 1) + b.substr(r);
+    ret[1].prev_actions = p2.prev_actions;
+    ret[1].current_state_actions = a.substr(l + 1) + b.substr(0, r);
     phase_update(ret[0]);
     phase_update(ret[1]);
     // cout << ret[0].op_cnt << ' '<< ret[1].op_cnt << endl;
@@ -182,6 +185,8 @@ void expansion() {
         uniform_int_distribution<int> dis(0, sz - 1);
         auto r = pop[dis(gen)];
         pop.emplace_back(scramble(r, 10));
+        // cout << "prev: " << pop[pop.size()-1].prev_actions << endl;
+        // cout << "cur: " << pop[pop.size()-1].current_state_actions << endl;
     }
 }
 
@@ -210,6 +215,7 @@ int main() {
     int total_step = 0;
     int total_step_each_phase[9] = {0};
     int prev_min_step = 0;
+    int problem_step = 0;
     op_map_init();
 
     for (int i = 0; i < RUN_NUM; i++) {
@@ -221,6 +227,7 @@ int main() {
             printf("%d : %s\n", t + 1, operation);
         redo:
             Rubik r(operation);
+            problem_step = r.op_cnt;
             if (DISPLAY) {
                 puts("original:\n");
                 r.print();
@@ -228,15 +235,12 @@ int main() {
             }
             int first_time[10] = {0};
             initialize(r);        
-            for(auto x: pop){
+            for(auto &x: pop){
             //     printf("prev : %s\n", x.prev_actions.c_str());
             //     printf("cur : %s\n", x.current_state_actions.c_str());        
                 string orig = operation;
                 x.prev_actions = orig + x.current_state_actions;
                 x.current_state_actions.clear();
-                
-                // printf("prev : %s\n", x.prev_actions.c_str());
-                // printf("cur : %s\n", x.current_state_actions.c_str());
             }
             prev_min_step = 0;
             int phase;
@@ -252,10 +256,12 @@ int main() {
                     goto redo;
                 }
                 expansion();
+                
                 for (int j = 0; j < generation; j++) {
                     vector<Rubik> offspring;
-                    for (int k = 0; k < population_size * 5; k++) {
+                    for (int k = 0; k < population_size * 5 ; k++) { 
                         Rubik x = tournament_selection(3);
+
                         if(x.phase!=phase){
                             printf("%d %d %d\n",x.phase,phase,x.value);
                             
@@ -263,29 +269,27 @@ int main() {
                         assert(x.phase == phase);
                         
                         Rubik y = tournament_selection(3);
-                        
-                        // printf("%d %d\n",y.phase,phase);
                         if(y.phase!=phase){
                             printf("%d %d %d\n",y.phase,phase,y.value);
                         }
                         assert(y.phase == phase);
                         vector<Rubik> cross = one_point_crossover(x,y);
                         if(cross[0].phase==phase){
+                            offspring.emplace_back(cross[0]);
                             mutation(cross[0]);
                             offspring.emplace_back(cross[0]);
                         }
                         if(cross[1].phase==phase){
+                            offspring.emplace_back(cross[1]);
                             mutation(cross[1]);
                             offspring.emplace_back(cross[1]);
                         }
-                        // mutation(cross[1]);
-                        // offspring.emplace_back(cross[1]);
+                        offspring.emplace_back(x);
                         mutation(x);
                         offspring.emplace_back(x);
+                        offspring.emplace_back(y); 
                         mutation(y);
                         offspring.emplace_back(y); 
-
-                        // cout << "generation " << j << ": " << cross[0].op_cnt << ' ' << cross[1].op_cnt << ' ' << x.op_cnt << ' '<<y.op_cnt << endl;
                     }
                     pop.insert(pop.end(), offspring.begin(), offspring.end());                   
                     sort(pop.begin(), pop.end());
@@ -319,10 +323,10 @@ int main() {
 
                 int min_step = 1000;
                 for (auto x : pop) {
-                    cout << x.op_cnt << ' ';
+                    // cout << x.op_cnt << ' ';
                     min_step = min(min_step, x.op_cnt);
                 }
-                printf("min steps: %d\n", min_step);
+                printf("min steps: %d\n", min_step-problem_step);
                 cout << "operations: " <<  pop[0].actions << endl;
                 step_each_phases[t][phase] = min_step - prev_min_step;
                 prev_min_step = min_step;
