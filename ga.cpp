@@ -75,9 +75,9 @@ Rubik scramble(Rubik r, int len) {
         }
     }
 
-    r.fitness();  // Necessary!!!otherwise the fitness value will not be
+    r.fitness();  // Necessary!!! otherwise the fitness value will not be
                   // updated.
-
+    // cout << "scrambled opcnt: " << r.op_cnt << endl;
     return r;
 }
 void initialize(Rubik &r) {
@@ -90,7 +90,7 @@ void initialize(Rubik &r) {
 Rubik tournament_selection(int sz) {
     uniform_int_distribution<int> dis(0, (int)pop.size() - 1);
     vector<Rubik> temp;
-    while (sz--) temp.push_back(pop[dis(gen)]);
+    while (sz--) temp.emplace_back(pop[dis(gen)]);
 
     return *max_element(temp.begin(), temp.end());
 }
@@ -172,6 +172,7 @@ vector<Rubik> one_point_crossover(Rubik &p1, Rubik &p2){
     ret.push_back(Rubik(child2.c_str()));
     phase_update(ret[0]);
     phase_update(ret[1]);
+    // cout << ret[0].op_cnt << ' '<< ret[1].op_cnt << endl;
     return ret;
 }
 // expand the size of pop to population_size
@@ -258,37 +259,35 @@ int main() {
                         if(x.phase!=phase){
                             printf("%d %d %d\n",x.phase,phase,x.value);
                             
-                        }                        assert(x.phase == phase);
-
+                        }
+                        assert(x.phase == phase);
+                        
                         Rubik y = tournament_selection(3);
+                        
                         // printf("%d %d\n",y.phase,phase);
                         if(y.phase!=phase){
                             printf("%d %d %d\n",y.phase,phase,y.value);
-                            
                         }
                         assert(y.phase == phase);
                         vector<Rubik> cross = one_point_crossover(x,y);
                         if(cross[0].phase==phase){
                             mutation(cross[0]);
                             offspring.emplace_back(cross[0]);
-
                         }
                         if(cross[1].phase==phase){
                             mutation(cross[1]);
                             offspring.emplace_back(cross[1]);
-
                         }
                         // mutation(cross[1]);
                         // offspring.emplace_back(cross[1]);
                         mutation(x);
                         offspring.emplace_back(x);
                         mutation(y);
-                        offspring.emplace_back(y);
+                        offspring.emplace_back(y); 
 
-                       
-                        
+                        // cout << "generation " << j << ": " << cross[0].op_cnt << ' ' << cross[1].op_cnt << ' ' << x.op_cnt << ' '<<y.op_cnt << endl;
                     }
-                    pop.insert(pop.end(), offspring.begin(), offspring.end());
+                    pop.insert(pop.end(), offspring.begin(), offspring.end());                   
                     sort(pop.begin(), pop.end());
                     // printf("%d %d %d %d\n",pop[0].value,pop[0].phase,pop.back().value,pop.back().phase);
                     pop.resize(population_size);
@@ -319,8 +318,12 @@ int main() {
                 }
 
                 int min_step = 1000;
-                for (auto x : pop) min_step = min(min_step, x.op_cnt);
+                for (auto x : pop) {
+                    cout << x.op_cnt << ' ';
+                    min_step = min(min_step, x.op_cnt);
+                }
                 printf("min steps: %d\n", min_step);
+                cout << "operations: " <<  pop[0].actions << endl;
                 step_each_phases[t][phase] = min_step - prev_min_step;
                 prev_min_step = min_step;
 
@@ -333,6 +336,7 @@ int main() {
                     total_step += min_step;
                 }
             }
+            pop[0].print();
             printf("\033[0;32m");
             puts("\rfinish                                 ");
             printf("\033[0m");

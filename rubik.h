@@ -88,6 +88,8 @@ struct Rubik {
         st_ptr = -1;  // index of the last element in the stack
         wca_ptr = 0;
         op_cnt = pre_op_cnt = 0;
+        actions = current_state_actions = prev_actions = "";
+
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 16; j++) state[i][j] = i;
 
@@ -105,12 +107,9 @@ struct Rubik {
             }
             operation(tmp);
         }
-        st_ptr = -1;  // reset the value
-        wca_ptr = 0;
-        op_cnt = pre_op_cnt = 0;
-        // actions = current_state_actions = prev_actions = "";
+        // st_ptr = -1;  // reset the value
+        // wca_ptr = 0;
         fitness();
-
     }
     bool operator<(const Rubik &other) const {
         // weight_l[] : the weight of the fitness function in each phase
@@ -294,7 +293,6 @@ struct Rubik {
     }
     /* Transform the stack and pair the inner and outer face turn to call */
     void st_to_wca() {
-    
         bool visited[4] = {0};
         // Ensure that the uppercase (outer) should appear first.
         sort(st + wca_ptr, st + st_ptr,
